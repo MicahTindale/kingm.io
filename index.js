@@ -21,6 +21,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.get('/', (req, res) => {
   res.render('join.ejs')
 });
+app.get('/updates', (req, res) => {
+  res.render('updates.ejs')
+});
 
 
 app.post('/join_game', (req, res) => {
@@ -37,8 +40,7 @@ app.post('/join_game', (req, res) => {
   res.render('main.ejs', {name: name, server: s});
 });
 
-var port = process.env.PORT || 3000;
-var server = app.listen(port, () => {
+var server = app.listen(3000, () => {
   console.log('server started');
 });
 
