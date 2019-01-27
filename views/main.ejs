@@ -1,0 +1,994 @@
+<html>
+<body style='background: black; margin: 0px; padding: 0px;'>
+<style>
+body {
+   -moz-user-select: none;
+   -webkit-user-select: none;
+   -ms-user-select: none;
+   user-select: none;
+}
+h1 { 
+font-family: Trebuchet MS; 
+font-size: 20px; display: inline; margin: 5px;
+}
+#extra_info {font-family: Trebuchet MS; 
+font-size: 13px; display: inline; margin: 5px;}
+
+input {width: 300px; height: 30px;}
+.container {
+  position: relative;
+  width: 50%;
+}
+</style>
+
+
+
+<div style='position: absolute; left: 0px; top: 0px;text-align: center; margin: 0px; padding: 0px;'>
+<canvas id='canvas' width='1280px' height='550px' style="background: white;" > </canvas>
+</div>
+<div style="position: absolute; left: 50%;">
+
+<div id="toClose"style="position: relative; z-index: 1; width: 600px; height: 400px; left: -50%;  margin-top: 100px; background: white"> 
+<div id="store" style="overflow: auto; overflow-x: hidden;position: absolute; width: 100%; height: 300px;">
+</div>
+<input style="
+border: 2px solid white;
+background: black;
+color: white; 
+font-family: Trebuchet MS; 
+position: absolute; 
+bottom: 10px; 
+left: 10px;
+font-size: 20px;
+width: 580px;" id="close_button"
+type="button" value="Close" > </input>
+
+</div> 
+
+</div>
+</div>
+
+<div style="position: absolute; z-index: 2; bottom: 50px; left: 20px; 
+margin: 0px; padding: 0px;">
+
+<input id="message" > </input>
+<input style="width: 75px;"type='button' onclick="sendMessage();" value="Send" id="send"> </input>
+    </div>
+
+<div id="pre_game"style="position: absolute; z-index: 3; width: 100%; height: 100%; text-align: center; background: black;display: none;">
+<h1 id="pl_count"style="color: white;font-size: 40px;">Players - 0/16</h1>
+<div id="names">
+</div><br>
+<input id="start_game" style="width: 300px; height: 50px; background: black; border: 2px solid white; color: white;" type="button" value="Start Game"></input>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>
+
+
+<script>
+
+document.getElementById("close_button").onclick = function(){
+ closeStore(); 
+};
+
+
+document.getElementById("message")
+    .addEventListener("keyup", function(event) {
+    event.preventDefault();
+    if (event.keyCode === 13) {
+        document.getElementById("send").click();
+        this.blur();
+    }
+});
+
+
+var canvas = document.getElementById('canvas');
+var ctx = canvas.getContext('2d');
+
+var mode = "sword";
+
+var inStore = false;
+
+var iron_s = new Image();
+iron_s.src= "/public/iron_sword.png";
+
+var swords = [];
+var selected_sword = 0;
+var bows = []; 
+var selected_bow = 0;
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+var width = 0.1;
+var height = 0.1;
+var speed = 10;
+var mouseEvent = undefined;
+var textBox = document.getElementById("message");
+
+var inTypingMode = false;
+
+
+var GAME = undefined;
+
+var serverName = "<%= server %>";
+var buttons = [];
+var bowButtons = [];
+var armorButtons = [];
+var socket = io(serverName);
+var players = [];
+var uniqueKey = "";
+var right = false; 
+var left = false;
+var up = false;
+var down = false;
+var xInc = 0;
+var yInc = 0;
+var xOffset = 0;
+var yOffset = 0;
+var mode = "sword";
+var prevRotation = 0;
+var messages = [];
+var purchased_swords = [];
+var purchased_bows = [];
+var purchased_armor = [];
+var arrows = [];
+var store = new Image();
+store.src=  "/public/store.png";
+purchased_swords.push(0);
+purchased_bows.push(0);
+purchased_armor.push(0);
+var isBowTime = false;
+var playerScores = [];
+
+var armor = [];
+
+var arrow_img = new Image();
+arrow_img.src = "/public/arrow.png";
+
+for(var i = 0; i < 5; i++){
+messages[i] = {msg: "", id: ""};
+}
+
+var sword_animation_timer = 15;
+var bow_animation_timer_local = 0; 
+var isMouseDown = false;
+
+
+window.onunload = function(){
+    //socket.emit("leaving", uniqueKey);
+  socket.disconnect();
+  }
+
+function openStore(){
+  document.getElementById("toClose").style.display = "block";
+  inStore = true;
+}
+function closeStore(){
+  document.getElementById("toClose").style.display = "none";
+  inStore = false;
+}
+closeStore();
+
+var name = "<%= name %>";
+socket.emit("info", {name: name});
+socket.on('disconnect', function(){
+  console.log("disconnecting");
+});
+
+function shiftMessages(message){
+  messages[4] = messages[3];
+  messages[3] = messages[2];
+  messages[2] = messages[1];
+  messages[1] = messages[0];
+  messages[0] = message;
+}
+
+function sendMessage(){
+  if(textBox.value != ""){
+  socket.emit("message", textBox.value);
+  canvas.focus();
+  textBox.value = "";
+  }
+}
+
+socket.on("client_message", function(newMessage){
+  shiftMessages(newMessage);
+});
+document.getElementById("start_game").onclick = function (){
+  socket.emit("start_game", {});
+}
+socket.on("hit_anim", function(info){
+  var player = findPlayer(players, info);
+  if(player != undefined){
+  player.sword_animation_timer = 0;
+  }
+});
+socket.on("scores", function(s){
+  playerScores = JSON.parse(s);
+});
+socket.on("new_sword", function(info){
+  var myPlayer = findPlayer(players, uniqueKey);
+  if(myPlayer != undefined){
+    myPlayer.money = info.money;
+    purchased_swords.push(info.id);
+    switchSword(info.id);
+    updateButtons();
+  }
+});
+socket.on("new_armor", function(info){
+  var myPlayer = findPlayer(players, uniqueKey);
+  if(myPlayer != undefined){
+    myPlayer.money = info.money;
+    purchased_armor.push(info.id);
+    switchArmor(info.id);
+    updateArmorButtons();
+  }
+});
+
+socket.on("bow_s", function(id){
+  var player = findPlayer(players, id);
+  if(player != undefined){
+    player.bow_animation_timer = 0;
+    player.isBowTime = true;
+  }
+});
+socket.on("bow_e", function(id){
+  var player = findPlayer(players, id);
+  if(player != undefined){
+    player.bow_animation_timer = 0;
+    player.isBowTime = false; 
+  }
+});
+socket.on("respawn", function(key){
+  if(uniqueKey === key){
+    purchased_swords = [];
+    purchased_swords.push(0);
+    purchased_bows = [];
+    purchased_bows.push(0);
+    purchased_armor = [];
+    purchased_armor.push(0);
+    
+  }
+});
+
+socket.on('uniqueKey', function(key){
+  uniqueKey = key.key;
+  GAME = key.game;
+  if(key.started){
+    document.getElementById("pre_game").style.display = "none";
+  }else{
+  document.getElementById("pre_game").style.display = "block";
+  }
+  loadSwords(GAME.redStore);
+  loadBows(GAME.redStore);
+  loadArmor(GAME.redStore);
+  loadStoreStuff();
+  setInterval(function(){
+ 
+ if(!isTextBoxSelected() && !inStore){
+  
+    if(right){ xInc = speed;}
+    if(left) {xInc = -speed;}
+    if(up){yInc = -speed;}
+    if(down){yInc = speed;}
+    if(isMouseDown && isBowTime){
+      xInc /= 2;
+      yInc /= 2;
+    }
+
+     if(xInc != 0 || yInc != 0){
+        socket.emit('position', {key: uniqueKey, xIncrease: xInc, yIncrease: yInc});
+      }
+      
+      xInc = 0;
+      yInc = 0;
+if(mouseEvent != undefined){
+  if(mouseEvent.movementX == 0 && mouseEvent.movementY == 0){
+
+  }else{
+    
+    var rot = angle(canvas.width/2, canvas.height/2, mouseEvent.pageX, mouseEvent.pageY);
+    if(rot != prevRotation){
+    socket.emit('rotation', {key: uniqueKey, rot: rot + 90});
+    }
+    prevRotation = rot;
+  }
+}
+ }
+sword_animation_timer++;
+bow_animation_timer_local++;
+  }, 1000/30);
+});
+socket.on("end_game", function(team){
+  socket.disconnect();
+  var pl = findPlayer(players, uniqueKey);
+  if(pl != undefined){
+    if(pl.team === team){
+      document.getElementById("pre_game").innerHTML = "<div style='text-align: center; font-size: 50px;color: white;'><h1>You Won!</h1></div>";
+      document.getElementById("pre_game").style.display = "inline-block";
+    }else{
+document.getElementById("pre_game").innerHTML = "<div style='text-align: center;font-size: 50px; color: white;'><h1>You Lost :(</h1></div>";
+      document.getElementById("pre_game").style.display = "inline-block";
+    }
+  }
+  setTimeout(function(){
+window.location.replace("/");
+
+  }, 5000);
+
+});
+
+socket.on("playerUpdate", function(v){
+players = v; 
+updateNames();
+});
+socket.on("start", function(){
+  document.getElementById("pre_game").style.display = "none";
+});
+socket.on("sword_update", function(info){
+  var player = findPlayer(players, info.key);
+  if(player != undefined){
+    player.selected_sword = info.sword; 
+  }
+});
+socket.on('updateAllPositions', function(pl){
+   var p = JSON.parse(pl.players);
+   arrows = JSON.parse(pl.arrows);
+  if(p.length != players.length){
+    socket.emit('requestPlayerUpdate', {});
+  }else{
+    for(x in p){
+      players[x].health = p[x].health;
+      players[x].targetX = p[x].targetX;
+      players[x].targetY = p[x].targetY;
+      players[x].targetRotation = p[x].targetRotation;
+      players[x].money = p[x].money;
+      players[x].selected_sword = p[x].selected_sword;
+      players[x].selected_bow = p[x].selected_bow;
+      players[x].selected_armor = p[x].selected_armor;
+      players[x].mode = p[x].mode;  
+      GAME.redScore = pl.game.redScore;
+      GAME.blueScore = pl.game.blueScore;
+      GAME.hill.percentageCaptured = pl.hill.percentageCaptured;
+      GAME.hill.capturingTeam = pl.hill.capturingTeam;
+      GAME.speedHill.percentageCaptured = pl.speedHill.p_c;
+      GAME.speedHill.capturingTeam = pl.speedHill.c_team;
+      
+      GAME.regenHill.percentageCaptured = pl.regenHill.p_c_1;
+      GAME.regenHill.capturingTeam = pl.regenHill.c_team_1;
+      
+    }
+    
+  }
+});
+
+setInterval(function(){
+  ctx.clearRect(0,0,canvas.width, canvas.height);
+  var myPlayer = findPlayer(players, uniqueKey);
+  
+  if(myPlayer != undefined && GAME != undefined){
+    mode = myPlayer.mode;
+    isBowTime = myPlayer.isBowTime;
+    if(mode === "sword"){
+      isBowTime = false;
+    }
+    myPlayer.selected_sword = selected_sword;
+   for (var x = 0 - (xOffset % 50); x < canvas.width; x += 50) {
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+            }
+            // horizontal grid lines
+            for (var y = 0 - (yOffset % 50); y < canvas.height; y += 50) {
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+  }
+  ctx.strokeStyle = "#bfbfbf";
+
+  ctx.stroke();
+  ctx.fillStyle = "black";
+    ctx.strokeStyle = "red";
+ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(0 - xOffset, 0 - yOffset);
+  ctx.lineTo(0 - xOffset, -yOffset + GAME.height);
+  ctx.lineTo(-xOffset + GAME.width, -yOffset + GAME.height);
+  ctx.lineTo(-xOffset + GAME.width, -yOffset);
+  ctx.lineTo(-xOffset, -yOffset);
+  ctx.stroke();
+    ctx.strokeStyle = "black";
+
+if(GAME.mode === "teams"){
+  ctx.globalAlpha = 0.3;
+  ctx.fillStyle = "red";
+  ctx.fillRect(-xOffset, -yOffset, GAME.width * GAME.redPercentage, GAME.height);
+    ctx.fillStyle = "blue";
+    ctx.fillRect(-xOffset + ((1 - GAME.bluePercentage) * GAME.width), -yOffset, GAME.width * GAME.bluePercentage, GAME.height);
+}
+  ctx.globalAlpha = 1;
+ctx.fillStyle = "black";
+
+  ctx.lineWidth = 1;
+ctx.fillStyle = "brown";
+for(w in GAME.walls){
+  ctx.fillRect(GAME.walls[w].x - xOffset, GAME.walls[w].y - yOffset, GAME.walls[w].width, GAME.walls[w].height);
+}
+var playerGame = GAME;
+ctx.textAlign = "center";
+
+ if(playerGame.hill.capturingTeam === "none"){
+      ctx.fillStyle = "gray";
+    }else if (playerGame.hill.capturingTeam === "red"){
+      ctx.fillStyle = "rgb(" + playerGame.hill.percentageCaptured * 255 + ", 0, 0, 1)";
+    }else{
+      ctx.fillStyle = "rgb(0,0," + playerGame.hill.percentageCaptured * 255 + ", 1)";
+    }
+    ctx.fillRect(playerGame.hill.x - playerGame.hill.size/2 - xOffset, playerGame.hill.y - playerGame.hill.size/2 - yOffset, playerGame.hill.size, playerGame.hill.size);
+
+    if(playerGame.mode === "teams"){
+    //REGEN HILL
+     if(playerGame.regenHill.capturingTeam === "none"){
+      ctx.fillStyle = "gray";
+    }else if (playerGame.regenHill.capturingTeam === "red"){
+      ctx.fillStyle = "rgb(" + playerGame.regenHill.percentageCaptured * 255 + ", 0, 0, 1)";
+    }else{
+      ctx.fillStyle = "rgb(0,0," + playerGame.regenHill.percentageCaptured * 255 + ", 1)";
+    }
+   
+    ctx.fillRect(playerGame.regenHill.x - playerGame.regenHill.size/2 - xOffset, playerGame.regenHill.y - playerGame.regenHill.size/2 - yOffset, playerGame.regenHill.size, playerGame.regenHill.size);
+    ctx.fillStyle = "white";
+    ctx.fillText("REGEN", playerGame.regenHill.x - xOffset, playerGame.regenHill.y -playerGame.regenHill.size/2 - 15 - yOffset);
+     
+     //SPEED HILL 
+     if(playerGame.speedHill.capturingTeam === "none"){
+      ctx.fillStyle = "gray";
+    }else if (playerGame.speedHill.capturingTeam === "red"){
+      ctx.fillStyle = "rgb(" + playerGame.speedHill.percentageCaptured * 255 + ", 0, 0, 1)";
+    }else{
+      ctx.fillStyle = "rgb(0,0," + playerGame.speedHill.percentageCaptured * 255 + ", 1)";
+    }
+   
+    ctx.fillRect(playerGame.speedHill.x - playerGame.speedHill.size/2 - xOffset, playerGame.speedHill.y - playerGame.speedHill.size/2 - yOffset, playerGame.speedHill.size, playerGame.speedHill.size);
+       ctx.fillStyle = "white";
+    ctx.fillText("SPEED", playerGame.speedHill.x  - xOffset, playerGame.speedHill.y - yOffset + playerGame.speedHill.size/2 + 35);
+    }
+    ctx.fillStyle = "white";
+    if(GAME.mode === "ffa"){
+      ctx.fillRect(playerGame.blueStore.x - 100 - xOffset, playerGame.blueStore.y - 100 - yOffset, playerGame.blueStore.width + 200, playerGame.blueStore.height + 100);
+
+      ctx.fillRect(playerGame.redStore.x - 100 - xOffset, playerGame.redStore.y - yOffset, playerGame.redStore.width + 200, playerGame.redStore.height + 100);
+    }
+
+    ctx.drawImage(store, playerGame.redStore.x - xOffset, playerGame.redStore.y - yOffset, playerGame.redStore.width, playerGame.redStore.height);
+    ctx.drawImage(store, playerGame.blueStore.x - xOffset, playerGame.blueStore.y - yOffset, playerGame.blueStore.width, playerGame.blueStore.height);
+    
+
+ctx.fillStyle = "black";
+
+  for(p in players){
+    players[p].sword_animation_timer++;
+    players[p].bow_animation_timer++;
+    var size = players[p].size;
+    if(players[p] != null && players[p] != undefined){
+      var x = (players[p].targetX - players[p].x) * 0.2;
+      var y = (players[p].targetY - players[p].y) * 0.2;
+      players[p].x += x;
+      players[p].y += y;
+     
+     players[p].rotation += ((((players[p].targetRotation-players[p].rotation)+180)%360)-180) * 0.5;
+
+
+      
+      xOffset = myPlayer.x - (canvas.width/2);
+  yOffset = myPlayer.y - (canvas.height/2);
+
+ //player
+ ctx.fillStyle = players[p].team;
+
+  ctx.beginPath();
+  ctx.shadowColor = "black";
+  ctx.shadowBlur = 20;
+   ctx.arc(players[p].x - xOffset, players[p].y - yOffset, size, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.drawImage(armor[players[p].selected_armor].image, players[p].x - xOffset - players[p].size - 2, players[p].y - yOffset - players[p].size - 2, players[p].size*2 + 4, players[p].size*2 + 4);
+    ctx.save();
+    ctx.translate(players[p].x - xOffset, players[p].y - yOffset);
+    ctx.rotate(degrees_to_radians(players[p].rotation - getSwordOffset(players[p]) * 2));
+    
+    if(players[p].mode === "sword"){
+    if(swords[players[p].selected_sword] != undefined){
+    if(swords[players[p].selected_sword].image != null && swords[players[p].selected_sword] != undefined){
+    ctx.drawImage(swords[players[p].selected_sword].image, 0, 0 - getSwordOffset(players[p]) - 20 - players[p].size, players[p].size * 2.5, players[p].size * 2.5);
+    }
+    }
+    }else{
+      if(bows[players[p].selected_bow] != undefined){
+    if(bows[players[p].selected_bow].image != null && bows[players[p].selected_bow] != undefined){
+    var sprite = 1;
+    if(players[p].isBowTime){
+     sprite = getSprite(3, players[p].bow_animation_timer, 20);
+    }
+    ctx.drawImage(bows[players[p].selected_bow].image[sprite - 1], 0, 0 - getSwordOffset(players[p]) - 20 - players[p].size, players[p].size * 2.5, players[p].size * 2.5);
+    }
+    }
+    }
+
+    ctx.restore();
+    var pHealth = players[p].health / players[p].maxHealth;
+    ctx.fillStyle = "gray";
+    ctx.fillRect(players[p].x - xOffset - 40, players[p].y - yOffset - 50, 80, 10);
+    ctx.fillStyle = "#90ee90";
+  ctx.fillRect(players[p].x - xOffset - 37.5, players[p].y - yOffset - 47.5, 75 * pHealth, 5);
+        
+}
+
+    
+    ctx.shadowBlur = 0;
+
+
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "black";
+
+   ctx.textAlign = "center";     
+   ctx.fillStyle = "black";
+    ctx.font = "bold 15px Trebuchet MS";
+
+
+    //player name
+    ctx.fillText(players[p].playerName, players[p].x - xOffset,players[p].y - yOffset + 60);
+    ctx.textAlign = "start";
+    ctx.font = "bold 25px Trebuchet MS";
+      ctx.fillText(players[p].playerName, 10, 90 + (30*p));
+    
+
+  }
+
+  for(a in arrows){
+    ctx.save();
+    var ar = arrows[a];
+    ctx.translate(ar.x- xOffset, ar.y - yOffset);
+    ctx.rotate(degrees_to_radians(ar.rotation));
+     ctx.drawImage(arrow_img, -40, -40, 80, 80);
+     ctx.restore();
+  }
+
+  ctx.fillText("Players:", 10, 60);
+
+    //GUI
+    ctx.textAlign = "start";
+    
+   ctx.fillText("Server: " + serverName, 10, 20);
+   ctx.textAlign = "end";
+   ctx.fillText("$" +  myPlayer.money, canvas.width - 30, 40); 
+   if(GAME.mode === "teams"){
+   ctx.fillStyle = "red";
+   ctx.fillText("RED: " + GAME.redScore + "/5000", canvas.width - 30, 80);
+   ctx.fillStyle = "blue";
+   ctx.fillText("BLUE: " + GAME.blueScore + "/5000", canvas.width - 30, 120);
+   }else{
+     for(var i = 0; i < 5; i++){
+       if(playerScores[i] != undefined){
+        ctx.fillText(playerScores[i].name + " :" + playerScores[i].score, canvas.width - 30, 80 + (i*30));
+       }
+     }
+   }
+
+    var healthBarWidth = canvas.width / 2;
+    ctx.fillStyle = "gray";
+    ctx.fillRect(canvas.width/2 - healthBarWidth/2, 20, healthBarWidth, 20);
+    ctx.fillStyle = "#90ee90";
+    var percentHealth = myPlayer.health / myPlayer.maxHealth;
+    ctx.fillRect(canvas.width/2 - (healthBarWidth - 5)/2, 22.5, 
+    percentHealth * (healthBarWidth - 5), 15);
+
+
+
+    ctx.textAlign = "start";
+    ctx.fillStyle = "black";
+    ctx.font = "bold 20px Trebuchet MS";
+
+    for(var i = 0; i < messages.length; i++){
+      var playerMSG = findPlayer(players, messages[i].id);
+      if(playerMSG != undefined && playerMSG != null){
+        ctx.fillStyle = playerMSG.team;
+      }else{
+        ctx.fillStyle = "black";
+      }
+      ctx.fillText(messages[i].msg, 20, canvas.height - 100 - (i * 40));
+    }
+
+    
+
+    
+  
+}
+}, 20);
+
+document.addEventListener('mousemove', function(event){
+  mouseEvent= event;
+});
+function isTextBoxSelected(){
+  return document.activeElement.tagName == 'INPUT';
+}
+
+document.addEventListener('click', function(event){
+  var player = 
+    findPlayer(players, uniqueKey);
+  if(!isTextBoxSelected() && !inStore){
+  if(player.mode === "sword"){
+  if(sword_animation_timer > swords[selected_sword].attack_speed){
+  socket.emit("hit", selected_sword);
+ 
+    player.sword_animation_timer = 0;
+  sword_animation_timer = 0;
+  }
+  }
+  var x = event.pageX;
+  var y = event.pageY;
+  var storeToCheck = undefined;
+  if(player.team === "red"){
+    storeToCheck = GAME.redStore;
+  }else{
+    storeToCheck = GAME.blueStore;
+  }
+  if(GAME.mode === "ffa"){storeToCheck = GAME.redStore;}
+  var d = dist(storeToCheck.x + storeToCheck.width/2, storeToCheck.y + storeToCheck.height/2, player.x, player.y);
+  if(d < 200){
+    var storeToCheckX = storeToCheck.x - xOffset;
+    var storeToCheckY = storeToCheck.y - yOffset;
+   if(x > storeToCheckX && x < storeToCheckX + storeToCheck.width && y > storeToCheckY && y < storeToCheckY + storeToCheck.height){
+     openStore();
+   }
+  }
+  if(GAME.mode === "ffa"){
+    storeToCheck = GAME.blueStore;
+      var d = dist(storeToCheck.x + storeToCheck.width/2, storeToCheck.y + storeToCheck.height/2, player.x, player.y);
+  if(d < 200){
+    var storeToCheckX = storeToCheck.x - xOffset;
+    var storeToCheckY = storeToCheck.y - yOffset;
+   if(x > storeToCheckX && x < storeToCheckX + storeToCheck.width && y > storeToCheckY && y < storeToCheckY + storeToCheck.height){
+     openStore();
+   }
+  }
+
+  }
+
+  }
+});
+
+function getSwordOffset(player){
+  if(player.sword_animation_timer <= 3){
+    return  (player.sword_animation_timer/3) * 30;
+  }else if(player.sword_animation_timer > 3 && player.sword_animation_timer <= 7){
+   return (1 - ((player.sword_animation_timer - 3) / 4)) * 30;
+  }else{
+    return 0;
+  }
+}
+
+function loadSwords(store){
+  for(s in store.sword_upgrades){
+    store.sword_upgrades[s].image = new Image();
+   store.sword_upgrades[s].image.src = store.sword_upgrades[s].path;
+   swords[s] = store.sword_upgrades[s];
+   swords[s].id = s;
+  }
+  return store;
+}
+function loadBows(store){
+  for(s in store.bow_upgrades){
+    for(i in store.bow_upgrades[s].path){
+    store.bow_upgrades[s].image[i] = new Image();
+   store.bow_upgrades[s].image[i].src = store.bow_upgrades[s].path[i];
+    }
+   bows[s] = store.bow_upgrades[s];
+   bows[s].id = s;
+  }
+  return store;
+}
+document.addEventListener('mousedown', function(event){
+  isMouseDown = true;
+  if(mode === "bow"){
+    bow_animation_timer_local = 0;
+  socket.emit("bow_start", {});
+  }
+});
+document.addEventListener('mouseup', function(event){
+  isMouseDown = false;
+  if(mode === "bow"){
+    socket.emit("bow_end", bow_animation_timer_local);
+
+  }
+});
+
+
+document.addEventListener('keydown', function(event){
+if(event.code == "KeyD"){
+ right = true;
+}
+if(event.code == "KeyA"){
+ left = true;
+}
+if(event.code == "KeyW"){
+ up = true;
+}
+if(event.code == "KeyS"){
+ down = true;
+}
+if(event.code == "Space"){
+}
+});
+document.addEventListener('keyup', function(event){
+if(event.code == "KeyD"){
+ right = false;
+}
+if(event.code == "KeyA"){
+ left = false;
+}
+if(event.code == "KeyW"){
+ up = false;
+}
+if(event.code == "KeyS"){
+ down = false;
+}
+
+if(event.code == "Digit1" && !isMouseDown){
+ socket.emit("mode", "sword");
+}
+if(event.code == "Digit2" && !isMouseDown){
+ socket.emit("mode", "bow");
+}
+
+});
+
+function findPlayer(list, key){
+  return list.find(function(p){
+    return key == p.key;
+  });
+}
+function degrees_to_radians(degrees)
+{
+  var pi = Math.PI;
+  return degrees * (pi/180);
+}
+function radians_to_degrees(radians)
+{
+  var pi = Math.PI;
+  return radians * (180/pi);
+}
+
+function angle(cx, cy, ex, ey) {
+var angleDeg = Math.atan2(ey - cy, ex - cx) * 180 / Math.PI;
+return angleDeg;
+}
+function dist(x1, y1, x2, y2){
+  var a = x1 - x2;
+var b = y1 - y2;
+
+var c = Math.sqrt( a*a + b*b );
+  return c;     
+}
+var toCheck = 0;
+function sword_id(id){
+  return id === toCheck;
+}
+
+function loadStoreStuff(){
+  var store = document.getElementById("store");
+
+  var sword_heading = document.createElement("h1");
+  sword_heading.innerHTML = "Swords";
+  store.appendChild(sword_heading);
+
+  for(var s in swords){
+    var item_div = document.createElement("div");
+    item_div.width = "600px";
+    item_div.style.width = "600px";
+
+    var img = document.createElement("img");
+  
+    img.src = swords[s].path;
+
+
+    var na = document.createElement("h1");
+    na.innerHTML = swords[s].name;
+    var na2 = document.createElement("h1");
+    na2.id = "extra_info";
+    na2.innerHTML = "Attack: " + swords[s].attack_power + "|Speed: " + swords[s].attack_speed + "|Range: " + swords[s].attack_range + "|Knockback: " + swords[s].knockback;
+   
+
+    buttons[s] = document.createElement("input");
+   buttons[s].type = "button";
+   buttons[s].style = "width: 55px; background: white; border: 2px solid black; ";
+    
+    buttons[s].value = "$" + swords[s].price;
+    item_div.appendChild(img);
+    item_div.appendChild(na);
+    item_div.appendChild(na2);
+    item_div.appendChild(buttons[s]);
+    store.appendChild(item_div);
+  }
+
+  updateButtons();
+
+  var bow_heading = document.createElement("h1");
+  bow_heading.innerHTML = "Bows";
+  store.appendChild(bow_heading);
+
+ for(var s in bows){
+    var item_div = document.createElement("div");
+    item_div.width = "600px";
+    item_div.style.width = "600px";
+
+    var img = document.createElement("img");
+  
+    img.src = bows[s].path[0];
+
+
+    var na = document.createElement("h1");
+    na.innerHTML = bows[s].name;
+    var na2 = document.createElement("h1");
+    na2.id = "extra_info";
+    na2.innerHTML = "Attack: " + bows[s].attack_power + "|Reload: " + bows[s].load_speed + "|Range: " + bows[s].attack_range + "|Knockback: " + bows[s].knockback;
+   
+
+    bowButtons[s] = document.createElement("input");
+   bowButtons[s].type = "button";
+   bowButtons[s].style = "width: 55px; background: white; border: 2px solid black; ";
+    
+    bowButtons[s].value = "$" + bows[s].price;
+    item_div.appendChild(img);
+    item_div.appendChild(na);
+    item_div.appendChild(na2);
+    item_div.appendChild(bowButtons[s]);
+    store.appendChild(item_div);
+  }
+
+  updateBowButtons();
+  var armor_heading = document.createElement("h1");
+  armor_heading.innerHTML = "Armor";
+  store.appendChild(bow_heading);
+for(var s in armor){
+    var item_div = document.createElement("div");
+    item_div.width = "600px";
+    item_div.style.width = "600px";
+
+    var img = document.createElement("img");
+  
+    img.src = armor[s].path;
+
+
+    var na = document.createElement("h1");
+    na.innerHTML = armor[s].name;
+    var na2 = document.createElement("h1");
+    na2.id = "extra_info";
+    na2.innerHTML = "Reduced Damage: " + armor[s].reduced_damage;
+   
+
+    armorButtons[s] = document.createElement("input");
+   armorButtons[s].type = "button";
+   armorButtons[s].style = "width: 55px; background: white; border: 2px solid black; ";
+    
+    armorButtons[s].value = "$" + armor[s].price;
+    item_div.appendChild(img);
+    item_div.appendChild(na);
+    item_div.appendChild(na2);
+    item_div.appendChild(armorButtons[s]);
+    store.appendChild(item_div);
+  }
+
+  updateArmorButtons();
+
+
+}
+function updateArmorButtons(){
+for(let i = 0; i < armorButtons.length; i++){
+    toCheck = i;
+    if(purchased_armor.find(sword_id) != undefined){
+    armorButtons[i].value = "Select";
+     armorButtons[i].onclick = function(){
+      switchArmor(i);
+    }
+    }else{
+      armorButtons[i].onclick = function(){
+        socket.emit("request_buy_armor", i);
+      }
+    }
+   
+  }
+}
+
+function updateButtons(){
+for(let i = 0; i < buttons.length; i++){
+    toCheck = i;
+    if(purchased_swords.find(sword_id) != undefined){
+    buttons[i].value = "Select";
+     buttons[i].onclick = function(){
+      switchSword(i);
+    }
+    }else{
+      buttons[i].onclick = function(){
+        socket.emit("request_buy", i);
+      }
+    }
+   
+  }
+}
+function updateBowButtons(){
+for(let i = 0; i < bowButtons.length; i++){
+    toCheck = i;
+    if(purchased_bows.find(sword_id) != undefined){
+    bowButtons[i].value = "Select";
+     bowButtons[i].onclick = function(){
+      switchBow(i);
+    }
+    }else{
+      bowButtons[i].onclick = function(){
+        socket.emit("request_buy_bow", i);
+      }
+    }
+   
+  }
+}
+
+function switchSword(id){
+selected_sword = id;
+socket.emit("sword_u", {key: uniqueKey, sword: selected_sword});
+}
+function switchBow(id){
+selected_bow = id;
+socket.emit("bow_u", {key: uniqueKey, sword: selected_bow});
+}
+function switchArmor(id){
+socket.emit("armor_u", {key: uniqueKey, sword: id});
+}
+
+
+function getSprite(l, t, max){
+  var toReturn = 0;
+
+  if(t > max){
+    toReturn = 3;
+  }else if(t < max/l){
+    toReturn = 1;
+  }else if(t < (max/l) * 2){
+    toReturn = 2;
+  }else{
+    toReturn = 3;
+  }
+  return toReturn;
+
+}
+
+function loadArmor(store){
+  for(s in store.armor_upgrades){
+    store.armor_upgrades[s].image = new Image();
+   store.armor_upgrades[s].image.src = store.armor_upgrades[s].path;
+   armor[s] = store.armor_upgrades[s];
+   armor[s].id = s;
+  }
+  return store;
+}
+
+function updateNames(){
+  document.getElementById("names").innerHTML = "";
+  document.getElementById("pl_count").innerHTML = "Players - " + players.length + "/16";
+  for(x in players){
+    var pl = players[x];
+    var pllbl = document.createElement("h1");
+    pllbl.style = "color: white; font-size: 30px;";
+    pllbl.innerHTML = pl.playerName;
+    document.getElementById("names").appendChild(pllbl);
+    document.getElementById("names").appendChild(document.createElement("br"));
+    
+  }
+  if(players.length >= 4){
+  document.getElementById("start_game").style.display = "inline-block";
+}else{
+  document.getElementById("start_game").style.display = "none";  
+}
+
+}
+
+</script>
+</body>
+</html>
