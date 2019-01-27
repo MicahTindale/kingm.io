@@ -40,7 +40,7 @@ app.post('/join_game', (req, res) => {
   res.render('main.ejs', {name: name, server: s});
 });
 
-var port = process.env.PORT || 3000l
+var port = process.env.PORT || 3000;
 var server = app.listen(port, () => {
   console.log('server started');
 });
