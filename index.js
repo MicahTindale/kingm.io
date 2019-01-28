@@ -82,7 +82,7 @@ function findFreeFFA(){
   }
   if(freeFFA != undefined){
   }else{
-    freeFFA = new Unique_Server("/FFA" + FFAs.length, "ffa");
+    freeFFA = new Unique_Server("/FFA" + FFAs.length + 1, "ffa");
     FFAs.push(freeFFA);
   }
   return freeFFA;
