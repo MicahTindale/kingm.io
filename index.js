@@ -302,6 +302,7 @@ if(players.length <= 0 && gamemode === "teams"){
     game.hill.percentageCaptured = 0;
     svr.started = false;
 }
+  svr.players = players;
 
 
 }, 1000/30);
