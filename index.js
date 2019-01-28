@@ -78,11 +78,12 @@ function findFreeFFA(){
   for(x in FFAs){
     if(FFAs[x].players.length < FFA_LIMIT){
       freeFFA = FFAs[x];
+	  break;
     }
   }
   if(freeFFA != undefined){
   }else{
-    freeFFA = new Unique_Server("/FFA" + FFAs.length + 1, "ffa");
+    freeFFA = new Unique_Server("/FFA" + FFAs.length, "ffa");
     FFAs.push(freeFFA);
   }
   return freeFFA;
