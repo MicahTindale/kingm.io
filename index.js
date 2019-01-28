@@ -237,7 +237,9 @@ for(var i = 0; i < 6; i++){
     if(game.time % 100 === 0){
       if(players[p]!= undefined){
         if(gamemode === "ffa"){
+			if(!playerInSafeZone(players[p], game)){
           players[p].money += 10;
+			}
         }else{
           if(svr.started){
           players[p].money += 10;
