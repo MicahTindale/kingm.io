@@ -76,7 +76,7 @@ var FFAs = [];
 function findFreeFFA(){
   var freeFFA = undefined;
   for(x in FFAs){
-    if(FFAs[x].players.length < FFA_LIMIT){
+    if(FFAs[x].players.length <= FFA_LIMIT){
       freeFFA = FFAs[x];
 	  break;
     }
@@ -97,13 +97,13 @@ function Unique_Server(namespace, mode){
   }else{
     this.started = false;
   }
-  new setUpServer(this.nsps, mode, this.players, this);
+  new setUpServer(this.nsps, mode, this);
 }
 
 
 //game logic & continued server setup
-function setUpServer(serverVAR, mode, players, svr){
-
+function setUpServer(serverVAR, mode, svr){
+var players = svr.players;
 var gamemode = mode;
 var teamToReturn = "red";
 
