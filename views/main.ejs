@@ -241,17 +241,7 @@ socket.on("bow_e", function(id){
     player.isBowTime = false; 
   }
 });
-socket.on("respawn", function(key){
-  if(uniqueKey === key){
-    purchased_swords = [];
-    purchased_swords.push(0);
-    purchased_bows = [];
-    purchased_bows.push(0);
-    purchased_armor = [];
-    purchased_armor.push(0);
-    
-  }
-});
+
 
 socket.on('uniqueKey', function(key){
   uniqueKey = key.key;
