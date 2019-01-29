@@ -177,7 +177,8 @@ for(var i = 0; i < 6; i++){
   updateArrows(arrows);
   for(p in players){
 	  players[p].idleTime++;
-	if(players[p].idleTime > 60 * 1000){
+	  console.log(players[p].idleTime);
+	if(players[p].idleTime > 60 * (1000/30)){
 		playerLeaving(players[p].key, players, serverVAR);
 		sendMessageToNamespace(serverVAR, "SERVER", players[p].playerName + " has been kicked from the game.", "");
 	}
@@ -470,8 +471,6 @@ socket.on('rotation', function(info){
   if(player != undefined){
   player.targetRotation = info.rot;
   player.rotation = player.targetRotation;
-  player.idleTime = 0;
-
   }
 });
 socket.on("start_game", function(){
