@@ -176,7 +176,11 @@ if(gamemode === "teams"){
 for(var i = 0; i < 6; i++){
   updateArrows(arrows);
   for(p in players){
-
+	  players[p].idleTime++;
+	if(players[p].idleTime > 60 * 1000){
+		playerLeaving(players[p].key, players, serverVAR);
+		sendMessageToNamespace(serverVAR, "SERVER", players[p].playerName + " has been kicked from the game.", "");
+	}
     var toRemove = [];
     for(a in arrows){
       var ar = arrows[a];
@@ -443,6 +447,7 @@ player.targetY = player.y + info.yIncrease;
 player.x += info.xIncrease;
 player.y += info.yIncrease;
 wallCollisionAndResponse(player, game, info);
+player.idleTime = 0;
 }
 });
 socket.on("armor_u", function(id){
@@ -465,6 +470,8 @@ socket.on('rotation', function(info){
   if(player != undefined){
   player.targetRotation = info.rot;
   player.rotation = player.targetRotation;
+  player.idleTime = 0;
+
   }
 });
 socket.on("start_game", function(){
@@ -658,6 +665,7 @@ this.selected_bow = 0;
 this.isBowTime = false;
 this.selected_armor = 0;
 this.score = 0;
+this.idleTime = 0;
 }
 function getPosition(team, game){
   var rand = Math.random();
