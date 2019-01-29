@@ -235,7 +235,7 @@ for(var i = 0; i < 6; i++){
   for(p in players){
 	 players[p].idleTime++;
 	  
-	if(players[p].idleTime > 60 * 30 * 6){
+	if(players[p].idleTime > 60 * 30){
 	sendMessageToNamespace(serverVAR, "SERVER", players[p].playerName + " has been kicked from the game.", "");
 	playersLeaving.push(players[p]);
 	}
