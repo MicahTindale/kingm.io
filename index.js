@@ -175,12 +175,14 @@ if(gamemode === "teams"){
 
 for(var i = 0; i < 6; i++){
   updateArrows(arrows);
+  var playersLeaving = [];
   for(p in players){
 	  players[p].idleTime++;
 	  console.log(players[p].idleTime);
+	  
 	if(players[p].idleTime > 60 * (1000/30)){
-		playerLeaving(players[p].key, players, serverVAR);
-		sendMessageToNamespace(serverVAR, "SERVER", players[p].playerName + " has been kicked from the game.", "");
+	sendMessageToNamespace(serverVAR, "SERVER", players[p].playerName + " has been kicked from the game.", "");
+	playersLeaving.push(players[p]);
 	}
     var toRemove = [];
     for(a in arrows){
@@ -233,6 +235,10 @@ for(var i = 0; i < 6; i++){
       arrows.splice(toRemove[x], 1);
     }
   }
+  for(x in players){
+    playerLeaving(players[x].key, players, serverVAR);
+  }
+  
   }
   for(p in players){
     if(players[p].isBowTime){
