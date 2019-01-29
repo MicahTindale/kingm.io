@@ -177,13 +177,7 @@ for(var i = 0; i < 6; i++){
   updateArrows(arrows);
   var playersLeaving = [];
   for(p in players){
-	  players[p].idleTime++;
-	  console.log(players[p].idleTime);
-	  
-	if(players[p].idleTime > 60 * 30){
-	sendMessageToNamespace(serverVAR, "SERVER", players[p].playerName + " has been kicked from the game.", "");
-	playersLeaving.push(players[p]);
-	}
+
     var toRemove = [];
     for(a in arrows){
       var ar = arrows[a];
@@ -235,12 +229,16 @@ for(var i = 0; i < 6; i++){
       arrows.splice(toRemove[x], 1);
     }
   }
-  for(x in playersLeaving){
-    playerLeaving(players[x].key, players, serverVAR);
-  }
+
   
   }
   for(p in players){
+	 players[p].idleTime++;
+	  
+	if(players[p].idleTime > 60 * 30 * 6){
+	sendMessageToNamespace(serverVAR, "SERVER", players[p].playerName + " has been kicked from the game.", "");
+	playersLeaving.push(players[p]);
+	}
     if(players[p].isBowTime){
     players[p].bow_animation_timer++;
     }else{
@@ -285,6 +283,9 @@ for(var i = 0; i < 6; i++){
   }
 
 }
+  for(x in playersLeaving){
+    playerLeaving(players[x].key, players, serverVAR);
+  }
  game_obj = {blueScore: game.blueScore, redScore: game.redScore};
  hill_obj = {capturingTeam: game.hill.capturingTeam, percentageCaptured: game.hill.percentageCaptured};
   speedHillObj = {c_team: game.speedHill.capturingTeam, p_c: game.speedHill.percentageCaptured};
