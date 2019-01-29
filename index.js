@@ -235,7 +235,7 @@ for(var i = 0; i < 6; i++){
       arrows.splice(toRemove[x], 1);
     }
   }
-  for(x in players){
+  for(x in playersLeaving){
     playerLeaving(players[x].key, players, serverVAR);
   }
   
