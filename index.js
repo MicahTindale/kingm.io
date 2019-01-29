@@ -180,7 +180,7 @@ for(var i = 0; i < 6; i++){
 	  players[p].idleTime++;
 	  console.log(players[p].idleTime);
 	  
-	if(players[p].idleTime > 60 * (1000/30)){
+	if(players[p].idleTime > 60 * 30){
 	sendMessageToNamespace(serverVAR, "SERVER", players[p].playerName + " has been kicked from the game.", "");
 	playersLeaving.push(players[p]);
 	}
