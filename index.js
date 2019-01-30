@@ -233,11 +233,7 @@ for(var i = 0; i < 6; i++){
   
   }
   for(p in players){
-	  if(playerInSafeZone(players[p], game)){
-		players[p].storeTime++;
-	  }else{
-		  players[p].storeTime = 0;
-	  }
+
 	 players[p].idleTime++;
 	  
 	if(players[p].idleTime > 60 * 30 * 3){
@@ -264,6 +260,11 @@ for(var i = 0; i < 6; i++){
       }
     }
   performCollisionDetection(players[p], game);
+  	  if(playerInSafeZone(players[p], game)){
+		players[p].storeTime++;
+	  }else{
+		  players[p].storeTime = 0;
+	  }
   game = updateHill(players[p], game, gamemode);
   if(players[p].health < players[p].maxHealth){
     if(players[p].team === game.regenHill.capturingTeam && game.regenHill.percentageCaptured >= 1){
