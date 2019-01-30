@@ -347,6 +347,7 @@ socket.on('updateAllPositions', function(pl){
       players[x].selected_bow = p[x].selected_bow;
       players[x].selected_armor = p[x].selected_armor;
       players[x].mode = p[x].mode;  
+	  players[x].hasShield = p[x].hasShield;
       GAME.redScore = pl.game.redScore;
       GAME.blueScore = pl.game.blueScore;
       GAME.hill.percentageCaptured = pl.hill.percentageCaptured;
@@ -492,18 +493,20 @@ ctx.fillStyle = "black";
 
  //player
  ctx.fillStyle = players[p].team;
-
-  ctx.beginPath();
-  ctx.shadowColor = "black";
-  ctx.shadowBlur = 20;
-   ctx.arc(players[p].x - xOffset, players[p].y - yOffset, size, 0, 2 * Math.PI);
-    ctx.fill();
+	if(players[p].hasShield){
 	ctx.beginPath();
 	ctx.fillStyle = "green";
 	ctx.globalAlpha = 0.3;
 	ctx.arc(players[p].x - xOffset, players[p].y - yOffset, size + 30, 0, 2 * Math.PI);
 	ctx.fill();
 	ctx.globalAlpha = 1;
+	}
+  ctx.beginPath();
+  ctx.shadowColor = "black";
+  ctx.shadowBlur = 20;
+   ctx.arc(players[p].x - xOffset, players[p].y - yOffset, size, 0, 2 * Math.PI);
+    ctx.fill();
+	
     ctx.drawImage(armor[players[p].selected_armor].image, players[p].x - xOffset - players[p].size - 2, players[p].y - yOffset - players[p].size - 2, players[p].size*2 + 4, players[p].size*2 + 4);
     ctx.save();
     ctx.translate(players[p].x - xOffset, players[p].y - yOffset);

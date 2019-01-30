@@ -714,6 +714,7 @@ this.score = 0;
 this.idleTime = 0;
 this.storeTime = 0;
 this.timeSinceLast = 30 * 10;
+this.hasShield = true;
 }
 function getPosition(team, game){
   var rand = Math.random();
