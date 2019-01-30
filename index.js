@@ -233,9 +233,10 @@ for(var i = 0; i < 6; i++){
   
   }
   for(p in players){
-	  console.log(players[p].storeTime);
 	  if(playerInSafeZone(players[p], game)){
 		players[p].storeTime++;
+	  }else{
+		  players[p].storeTime = 0;
 	  }
 	 players[p].idleTime++;
 	  
