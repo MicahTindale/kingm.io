@@ -333,11 +333,11 @@ serverVAR.on('connection', function(socket){
   console.log("THERE HAS BEEN A CONNECTION");
   if(gamemode === "ffa"){
 	if(players.length > FFA_LIMIT){
-		serverVAR.to(players[p].key).emit("kick", "ffa");
+		socket.emit("kick", "ffa");
 	}
   }else{
 	if(players.length > PUBLIC_TEAMS_LIMIT){
-		serverVAR.to(players[p].key).emit("kick", "teams");
+		socket.emit("kick", "teams");
 	}
   }
   socket.on("disconnect", function(){
