@@ -246,8 +246,8 @@ socket.on("bow_e", function(id){
   }
 });
 socket.on("kick", function(x){
+socket.disconnect();
 window.location.replace("/");
-
 });
 
 socket.on('uniqueKey', function(key){
