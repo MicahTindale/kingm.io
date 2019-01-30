@@ -216,10 +216,7 @@ for(var i = 0; i < 6; i++){
                   sendMessageToNamespace(serverVAR, "SERVER", players[p].playerName + " was annihilated by " + p1ds.playerName, "");
                 }
               }
-             }else{
-				players[p].storeTime++;
-				
-			 }
+             }
           
         }
        
@@ -236,6 +233,9 @@ for(var i = 0; i < 6; i++){
   
   }
   for(p in players){
+	  if(playerInSafeZone(players[p], game)){
+		players[p].storeTime++;
+	  }
 	 players[p].idleTime++;
 	  
 	if(players[p].idleTime > 60 * 30 * 3){
