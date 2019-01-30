@@ -262,10 +262,6 @@ for(var i = 0; i < 6; i++){
   performCollisionDetection(players[p], game);
   	  if(playerInSafeZone(players[p], game)){
 		players[p].storeTime++;
-		if(players[p].timeSinceLast < 30 * 10){
-			player.targetY = 300;
-			player.y = 300;
-		}
 	  }else{
 		  players[p].timeSinceLast++;
 		  players[p].storeTime = 0;
@@ -523,9 +519,14 @@ function playerInSafeZone(player, game){
 		player.y = 300;
 		player.storeTime = 0;
 		player.timeSinceLast = 0;
+	}else if(player.timeSinceLast < 30 * 10){
+		player.y = 300;
+		player.targetY = 300;
 	}else{
 	is = true;
 	}
+
+	
   }
   else if(player.x - player.size > game.blueStore.x - 100 && player.x + player.size < game.blueStore.x + game.blueStore.width + 100 && player.y - player.size > game.blueStore.y - 100 && player.y + player.size < game.blueStore.y + game.blueStore.height){
 	if(player.storeTime > 30 * 10){
@@ -533,7 +534,9 @@ function playerInSafeZone(player, game){
 		player.y = game.height - 300;
 		player.storeTime = 0;
 				player.timeSinceLast = 0;
-
+	}else if(player.timeSinceLast < 30 * 10){
+		player.y = game.height - 300;
+		player.targetY = game.height - 300;
 	}else{
 	is = true;
 	}
