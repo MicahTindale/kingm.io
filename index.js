@@ -262,7 +262,12 @@ for(var i = 0; i < 6; i++){
   performCollisionDetection(players[p], game);
   	  if(playerInSafeZone(players[p], game)){
 		players[p].storeTime++;
+		if(players[p].timeSinceLast < 30 * 10){
+			player.targetY = 300;
+			player.y = 300;
+		}
 	  }else{
+		  players[p].timeSinceLast++;
 		  players[p].storeTime = 0;
 	  }
   game = updateHill(players[p], game, gamemode);
@@ -517,6 +522,7 @@ function playerInSafeZone(player, game){
 		player.targetY = 300;
 		player.y = 300;
 		player.storeTime = 0;
+		player.timeSinceLast = 0;
 	}else{
 	is = true;
 	}
@@ -526,6 +532,8 @@ function playerInSafeZone(player, game){
 		player.targetY = game.height - 300;
 		player.y = game.height - 300;
 		player.storeTime = 0;
+				player.timeSinceLast = 0;
+
 	}else{
 	is = true;
 	}
@@ -692,6 +700,7 @@ this.selected_armor = 0;
 this.score = 0;
 this.idleTime = 0;
 this.storeTime = 0;
+this.timeSinceLast = 30 * 10;
 }
 function getPosition(team, game){
   var rand = Math.random();
