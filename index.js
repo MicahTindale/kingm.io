@@ -76,6 +76,7 @@ var FFAs = [];
 function findFreeFFA(){
   var freeFFA = undefined;
   for(x in FFAs){
+	  console.log(FFAs[x].players);
     if(FFAs[x].players.length <= FFA_LIMIT){
       freeFFA = FFAs[x];
 	  break;
