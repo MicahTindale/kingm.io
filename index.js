@@ -216,7 +216,10 @@ for(var i = 0; i < 6; i++){
                   sendMessageToNamespace(serverVAR, "SERVER", players[p].playerName + " was annihilated by " + p1ds.playerName, "");
                 }
               }
-             }
+             }else{
+				players[p].storeTime++;
+				
+			 }
           
         }
        
@@ -235,7 +238,7 @@ for(var i = 0; i < 6; i++){
   for(p in players){
 	 players[p].idleTime++;
 	  
-	if(players[p].idleTime > 60 * 30){
+	if(players[p].idleTime > 60 * 30 * 3){
 		serverVAR.to(players[p].key).emit("kick", {});
 	sendMessageToNamespace(serverVAR, "SERVER", players[p].playerName + " has been kicked from the game.", "");
 	playersLeaving.push(players[p]);
@@ -507,10 +510,22 @@ var c = Math.sqrt( a*a + b*b );
 function playerInSafeZone(player, game){
   var is = false;
   if(player.x - player.size > game.redStore.x - 100 && player.x + player.size < game.redStore.x + game.redStore.width + 100 && player.y - player.size > game.redStore.y && player.y + player.size < game.redStore.y + game.redStore.height + 100){
-    is = true;
+    if(player.storeTime > 30 * 10){
+		player.targetY = 300;
+		player.y = 300;
+		player.storeTime = 0;
+	}else{
+	is = true;
+	}
   }
   else if(player.x - player.size > game.blueStore.x - 100 && player.x + player.size < game.blueStore.x + game.blueStore.width + 100 && player.y - player.size > game.blueStore.y - 100 && player.y + player.size < game.blueStore.y + game.blueStore.height){
-    is = true;
+	if(player.storeTime > 30 * 10){
+		player.targetY = game.height - 300;
+		player.y = game.height - 300;
+		player.storeTime = 0;
+	}else{
+	is = true;
+	}
   }
   return is;
 }
@@ -789,6 +804,7 @@ function Game(mode){
   }
   this.blueStore = new Store(blueStoreX, blueStoreY, 200, 100);
   this.mode = mode;
+  this.storeTime = 0; 
 }
 
 function Hill(width, height,size){
