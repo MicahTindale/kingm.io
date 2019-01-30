@@ -142,7 +142,7 @@ purchased_bows.push(0);
 purchased_armor.push(0);
 var isBowTime = false;
 var playerScores = [];
-
+var isLoopGoing = false;
 var armor = [];
 
 var arrow_img = new Image();
@@ -261,6 +261,7 @@ socket.on('uniqueKey', function(key){
   loadBows(GAME.redStore);
   loadArmor(GAME.redStore);
   loadStoreStuff();
+  startDrawingLoop();
   setInterval(function(){
  
  if(!isTextBoxSelected() && !inStore){
@@ -360,6 +361,8 @@ socket.on('updateAllPositions', function(pl){
   }
 });
 
+function startDrawingLoop(){
+isLoopGoing = true;
 setInterval(function(){
   ctx.clearRect(0,0,canvas.width, canvas.height);
   var myPlayer = findPlayer(players, uniqueKey);
@@ -413,6 +416,7 @@ for(w in GAME.walls){
 var playerGame = GAME;
 ctx.textAlign = "center";
 
+if(playerGame.hill.capturingTeam != undefined && playerGame.hill.capturingTeam != undefined){
  if(playerGame.hill.capturingTeam === "none"){
       ctx.fillStyle = "gray";
     }else if (playerGame.hill.capturingTeam === "red"){
@@ -421,6 +425,8 @@ ctx.textAlign = "center";
       ctx.fillStyle = "rgb(0,0," + playerGame.hill.percentageCaptured * 255 + ", 1)";
     }
     ctx.fillRect(playerGame.hill.x - playerGame.hill.size/2 - xOffset, playerGame.hill.y - playerGame.hill.size/2 - yOffset, playerGame.hill.size, playerGame.hill.size);
+}
+
 
     if(playerGame.mode === "teams"){
     //REGEN HILL
@@ -449,6 +455,9 @@ ctx.textAlign = "center";
        ctx.fillStyle = "white";
     ctx.fillText("SPEED", playerGame.speedHill.x  - xOffset, playerGame.speedHill.y - yOffset + playerGame.speedHill.size/2 + 35);
     }
+	
+	
+	
     ctx.fillStyle = "white";
     if(GAME.mode === "ffa"){
       ctx.fillRect(playerGame.blueStore.x - 100 - xOffset, playerGame.blueStore.y - 100 - yOffset, playerGame.blueStore.width + 200, playerGame.blueStore.height + 100);
@@ -456,6 +465,7 @@ ctx.textAlign = "center";
       ctx.fillRect(playerGame.redStore.x - 100 - xOffset, playerGame.redStore.y - yOffset, playerGame.redStore.width + 200, playerGame.redStore.height + 100);
     }
 
+	
     ctx.drawImage(store, playerGame.redStore.x - xOffset, playerGame.redStore.y - yOffset, playerGame.redStore.width, playerGame.redStore.height);
     ctx.drawImage(store, playerGame.blueStore.x - xOffset, playerGame.blueStore.y - yOffset, playerGame.blueStore.width, playerGame.blueStore.height);
     
@@ -600,6 +610,7 @@ ctx.fillStyle = "black";
   
 }
 }, 20);
+}
 
 document.addEventListener('mousemove', function(event){
   mouseEvent= event;
