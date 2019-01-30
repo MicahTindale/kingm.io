@@ -689,6 +689,7 @@ this.isBowTime = false;
 this.selected_armor = 0;
 this.score = 0;
 this.idleTime = 0;
+this.storeTime = 0;
 }
 function getPosition(team, game){
   var rand = Math.random();
