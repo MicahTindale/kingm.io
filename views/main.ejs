@@ -208,6 +208,9 @@ socket.on("hit_anim", function(info){
 socket.on("scores", function(s){
   playerScores = JSON.parse(s);
 });
+socket.on("disconnected", function(){
+window.replace = "/";
+});
 socket.on("new_sword", function(info){
   var myPlayer = findPlayer(players, uniqueKey);
   if(myPlayer != undefined){
