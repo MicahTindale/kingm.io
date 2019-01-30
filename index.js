@@ -238,7 +238,7 @@ for(var i = 0; i < 6; i++){
 	 players[p].idleTime++;
 	  
 	if(players[p].idleTime > 60 * 30 * 3){
-		serverVAR.to(players[p].key).emit("kick", {});
+		serverVAR.to(players[p].key).emit("kick", undefined);
 	sendMessageToNamespace(serverVAR, "SERVER", players[p].playerName + " has been kicked from the game.", "");
 	playersLeaving.push(players[p]);
 	}
@@ -331,6 +331,15 @@ if(players.length <= 0 && gamemode === "teams"){
 //connection
 serverVAR.on('connection', function(socket){
   console.log("THERE HAS BEEN A CONNECTION");
+  if(gamemode === "ffa"){
+	if(players.length > FFA_LIMIT){
+		serverVAR.to(players[p].key).emit("kick", "ffa");
+	}
+  }else{
+	if(players.length > PUBLIC_TEAMS_LIMIT){
+		serverVAR.to(players[p].key).emit("kick", "teams");
+	}
+  }
   socket.on("disconnect", function(){
     playerLeaving(socket.id, players, serverVAR);
   });

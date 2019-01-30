@@ -245,8 +245,9 @@ socket.on("bow_e", function(id){
     player.isBowTime = false; 
   }
 });
-socket.on("kick", function(){
+socket.on("kick", function(x){
 window.location.replace("/");
+
 });
 
 socket.on('uniqueKey', function(key){
