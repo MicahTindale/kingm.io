@@ -107,6 +107,7 @@ function setUpServer(serverVAR, mode, svr){
 var players = svr.players;
 var gamemode = mode;
 var teamToReturn = "red";
+var power_ups = [];
 
  var game_obj = undefined;
  var hill_obj = undefined;
@@ -714,7 +715,7 @@ this.score = 0;
 this.idleTime = 0;
 this.storeTime = 0;
 this.timeSinceLast = 30 * 10;
-this.hasShield = true;
+this.hasShield = false;
 }
 function getPosition(team, game){
   var rand = Math.random();
