@@ -145,8 +145,10 @@ var playerScores = [];
 var isLoopGoing = false;
 var armor = [];
 
-var arrow_img = new Image();
-arrow_img.src = "/public/arrow.png";
+var arrow_img = [];
+arrow_img[0] = new Image();
+arrow_img[0].src = "/public/arrow.png";
+
 
 for(var i = 0; i < 5; i++){
 messages[i] = {msg: "", id: ""};
@@ -219,6 +221,15 @@ socket.on("new_sword", function(info){
     purchased_swords.push(info.id);
     switchSword(info.id);
     updateButtons();
+  }
+});
+socket.on("new_bow", function(info){
+  var myPlayer = findPlayer(players, uniqueKey);
+  if(myPlayer != undefined){
+    myPlayer.money = info.money;
+    purchased_bows.push(info.id);
+    switchBow(info.id);
+    updateBowButtons();
   }
 });
 socket.on("new_armor", function(info){
@@ -370,6 +381,7 @@ setInterval(function(){
   var myPlayer = findPlayer(players, uniqueKey);
   
   if(myPlayer != undefined && GAME != undefined){
+  bow_animation_timer_local = myPlayer.bow_animation_timer;
     mode = myPlayer.mode;
     isBowTime = myPlayer.isBowTime;
     if(mode === "sword"){
@@ -524,7 +536,7 @@ ctx.fillStyle = "black";
     if(bows[players[p].selected_bow].image != null && bows[players[p].selected_bow] != undefined){
     var sprite = 1;
     if(players[p].isBowTime){
-     sprite = getSprite(3, players[p].bow_animation_timer, 20);
+     sprite = getSprite(2, players[p].bow_animation_timer, bows[players[p].selected_bow].load_speed * 20);
     }
     ctx.drawImage(bows[players[p].selected_bow].image[sprite - 1], 0, 0 - getSwordOffset(players[p]) - 20 - players[p].size, players[p].size * 2.5, players[p].size * 2.5);
     }
@@ -566,7 +578,7 @@ ctx.fillStyle = "black";
     var ar = arrows[a];
     ctx.translate(ar.x- xOffset, ar.y - yOffset);
     ctx.rotate(degrees_to_radians(ar.rotation));
-     ctx.drawImage(arrow_img, -40, -40, 80, 80);
+     ctx.drawImage(arrow_img[0], -40, -40, 80, 80);
      ctx.restore();
   }
 
@@ -708,7 +720,6 @@ function loadBows(store){
 document.addEventListener('mousedown', function(event){
   isMouseDown = true;
   if(mode === "bow"){
-    bow_animation_timer_local = 0;
   socket.emit("bow_start", {});
   }
 });
@@ -964,18 +975,13 @@ socket.emit("armor_u", {key: uniqueKey, sword: id});
 
 
 function getSprite(l, t, max){
-  var toReturn = 0;
-
-  if(t > max){
-    toReturn = 3;
-  }else if(t < max/l){
-    toReturn = 1;
-  }else if(t < (max/l) * 2){
-    toReturn = 2;
+  if(t < max / 2){
+	return 1;
+  }else if(t < max){
+	return 2;
   }else{
-    toReturn = 3;
+	return 3;
   }
-  return toReturn;
 
 }
 

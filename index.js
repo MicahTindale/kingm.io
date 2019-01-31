@@ -42,7 +42,7 @@ app.post('/join_game', (req, res) => {
 
 var port = process.env.PORT || 3000;
 var server = app.listen(port, () => {
-  console.log('server started');
+  console.log('server started on port ' + port);
 });
 
 //socket.io
@@ -195,6 +195,10 @@ for(var i = 0; i < 6; i++){
              toRemove.push(a);
              var armor = game.redStore.armor_upgrades[players[p]  .selected_armor];
                players[p].health -= 15 * (1 - armor.reduced_damage);
+			   players[p].x += ar.vel.x * ar.knockback * 50;
+			   players[p].y += ar.vel.y * ar.knockback * 50;
+			   players[p].targetX = players[p].x;
+			   players[p].targetY = players[p].y;
                if(players[p].health <= 0){
                 respawnPlayer(players[p], game); 
                 
@@ -210,6 +214,11 @@ for(var i = 0; i < 6; i++){
              var armor = game.redStore.armor_upgrades[players[p]  .selected_armor];
              if(!playerInSafeZone(players[p], game)){
                players[p].health -= 15 * (1 - armor.reduced_damage);
+			   players[p].x += ar.vel.x * ar.knockback * 50;
+			   players[p].y += ar.vel.y * ar.knockback * 50;
+			   players[p].targetX = players[p].x;
+			   players[p].targetY = players[p].y;
+			   
               if(players[p].health <= 0){
                 respawnPlayer(players[p], game); 
                 var p1ds = findPlayer(players, ar.from_player_id);
@@ -402,9 +411,9 @@ socket.on("bow_start", function(){
 socket.on("bow_end", function(num){
   serverVAR.emit("bow_e", socket.id);
   var player = findPlayer(players, socket.id);
-  if(player != undefined && num >= 20 && !playerInSafeZone(player, game)){
+  if(player != undefined && num >= 20 * game.redStore.bow_upgrades[player.selected_bow].load_speed && !playerInSafeZone(player, game)){
     var ray = getNormalizedRay(player.rotation);
-    arrows.push(new Arrow(player.x - (ray.y * 42), player.y - (-ray.x * 42), {x: ray.x, y: ray.y}, player.rotation, player.team, player.key));
+    arrows.push(new Arrow(player.x - (ray.y * 42), player.y - (-ray.x * 42), {x: ray.x, y: ray.y}, player.rotation, player.team, player.key, game.redStore.bow_upgrades[player.selected_bow].knockback));
     player.isBowTime = false;
   }
 });
@@ -431,6 +440,13 @@ socket.on("request_buy", function(id){
   if(player.money >= game.redStore.sword_upgrades[id].price){
     player.money -= game.redStore.sword_upgrades[id].price;
     socket.emit("new_sword", {id: id, money: player.money});
+  }
+});
+socket.on("request_buy_bow", function(id){
+  var player = findPlayer(players, socket.id);
+  if(player.money >= game.redStore.bow_upgrades[id].price){
+    player.money -= game.redStore.bow_upgrades[id].price;
+    socket.emit("new_bow", {id: id, money: player.money});
   }
 });
 socket.on("sword_u", function(info){
@@ -618,7 +634,7 @@ function updateArrows(arrows){
   }
 }
 
-function Arrow(x, y, vel, rot, ft, f_p_id){
+function Arrow(x, y, vel, rot, ft, f_p_id, kb){
   this.x = x;
   this.y = y;
   this.vel = vel; 
@@ -626,6 +642,7 @@ function Arrow(x, y, vel, rot, ft, f_p_id){
   this.timer = 0;
   this.from_team = ft;
   this.from_player_id = f_p_id;
+  this.knockback = kb;
 }
 
 function getNormalizedRay(rotation){
@@ -897,7 +914,13 @@ function Store(x, y, width, height){
    cross_bow[0] = "/public/bow_1.png";
    cross_bow[1] = "/public/bow2.png";
    cross_bow[2] = "/public/bow_3.png";
-   this.bow_upgrades.push(new Bow(cross_bow, "Cross Bow", 1, 1, 500, 0));
+   var kb_bow = [];
+    kb_bow[0] = "/public/kb_bow_1.png";
+   kb_bow[1] = "/public/kb_bow_2.png";
+   kb_bow[2] = "/public/kb_bow_3.png";
+   this.bow_upgrades.push(new Bow(cross_bow, "Cross Bow", 1, 1, 500, 0, 1));
+   this.bow_upgrades.push(new Bow(kb_bow, "Knockback Bow", 1, 2.5, 500,1000, 5));
+   
     this.armor_upgrades = [];
     this.armor_upgrades.push(new Armor("/public/blank.png", "No Armor", 0, 0));
     this.armor_upgrades.push(new Armor("/public/iron_armor.png", "Iron Armor", 0.05, 500));
@@ -918,7 +941,7 @@ function Armor(path, name, reduced_damage, price){
   this.price = price;
 }
 
-function Bow(img_path, name, attack_power, load_speed, attack_range, price){
+function Bow(img_path, name, attack_power, load_speed, attack_range, price, kb){
   this.name = name;
   this.path = img_path;
   this.attack_power = attack_power;
@@ -926,7 +949,7 @@ function Bow(img_path, name, attack_power, load_speed, attack_range, price){
   this.attack_range = attack_range;
   this.price  = price;
   this.image = [];
-  this.knockback = 1;
+  this.knockback = kb;
 
 }
 
