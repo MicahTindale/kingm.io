@@ -199,6 +199,8 @@ for(var i = 0; i < 6; i++){
 			   players[p].y += ar.vel.y * ar.knockback * 50;
 			   players[p].targetX = players[p].x;
 			   players[p].targetY = players[p].y;
+			     performCollisionDetection(players[p], game);
+
                if(players[p].health <= 0){
                 respawnPlayer(players[p], game); 
                 
@@ -218,7 +220,8 @@ for(var i = 0; i < 6; i++){
 			   players[p].y += ar.vel.y * ar.knockback * 50;
 			   players[p].targetX = players[p].x;
 			   players[p].targetY = players[p].y;
-			   
+			     performCollisionDetection(players[p], game);
+
               if(players[p].health <= 0){
                 respawnPlayer(players[p], game); 
                 var p1ds = findPlayer(players, ar.from_player_id);
