@@ -199,7 +199,7 @@ for(var i = 0; i < 6; i++){
 			   players[p].y += ar.vel.y * ar.knockback * 50;
 			   players[p].targetX = players[p].x;
 			   players[p].targetY = players[p].y;
-			wallCollisionAndResponse(players[p], game, {xIncrease: 0, yIncrease: 0});
+			wallCollisionAndResponse(players[p], game, {xIncrease: ar.vel.x * ar.knockback * 50, yIncrease: ar.vel.y * ar.knockback * 50});
 
                if(players[p].health <= 0){
                 respawnPlayer(players[p], game); 
@@ -220,7 +220,7 @@ for(var i = 0; i < 6; i++){
 			   players[p].y += ar.vel.y * ar.knockback * 50;
 			   players[p].targetX = players[p].x;
 			   players[p].targetY = players[p].y;
-			wallCollisionAndResponse(players[p], game, {xIncrease: 0, yIncrease: 0});
+			wallCollisionAndResponse(players[p], game, {xIncrease: ar.vel.x * ar.knockback * 50, yIncrease: ar.vel.y * ar.knockback * 50});
 
               if(players[p].health <= 0){
                 respawnPlayer(players[p], game); 
