@@ -220,6 +220,10 @@ socket.on("hit_anim", function(info){
   player.sword_animation_timer = 0;
   }
 });
+socket.on("respawn_ffa", function(){
+console.log("RSPWN");
+});
+
 socket.on("scores", function(s){
   playerScores = JSON.parse(s);
 });
