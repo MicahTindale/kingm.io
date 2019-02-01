@@ -224,6 +224,10 @@ socket.on("respawn_ffa", function(ar){
 	console.log(selected_sword);
 	console.log(ar);
 	console.log(selected_bow);
+	purchased_armor.splice(purchased_armor.indexOf(ar), 1);
+	purchased_bows.splice(purchased_bows.indexOf(selected_bow), 1);
+	purchased_swords.splice(purchased_swords.indexOf(selected_sword), 1);
+	
 	
 });
 
