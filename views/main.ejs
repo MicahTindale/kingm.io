@@ -221,7 +221,9 @@ socket.on("hit_anim", function(info){
   }
 });
 socket.on("respawn_ffa", function(ar){
-	
+	console.log(selected_sword);
+	console.log(selected_armor);
+	console.log(selected_bow);
 	
 });
 
@@ -405,7 +407,7 @@ setInterval(function(){
     if(mode === "sword"){
       isBowTime = false;
     }
-    myPlayer.selected_sword = selected_sword;
+   // myPlayer.selected_sword = selected_sword;
    for (var x = 0 - (xOffset % 50); x < canvas.width; x += 50) {
                 ctx.moveTo(x, 0);
                 ctx.lineTo(x, canvas.height);
