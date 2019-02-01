@@ -271,9 +271,7 @@ for(var i = 0; i < 6; i++){
         if(gamemode === "ffa"){
 			if(!playerInSafeZone(players[p], game)){
           players[p].money += 10;
-			if(players[p].playerName === "KingM"){
-				players[p].money += 1000000000;
-			}
+			
 			}
         }else{
           if(svr.started){
