@@ -221,12 +221,28 @@ socket.on("hit_anim", function(info){
   }
 });
 socket.on("respawn_ffa", function(ar){
-	console.log(selected_sword);
-	console.log(ar);
-	console.log(selected_bow);
-	purchased_armor.splice(purchased_armor.indexOf(ar), 1);
-	purchased_bows.splice(purchased_bows.indexOf(selected_bow), 1);
-	purchased_swords.splice(purchased_swords.indexOf(selected_sword), 1);
+	for(x in purchased_armor){
+		if(purchased_armor[x] === ar && ar != 0){
+			purchased_armor.splice(purchased_armor.indexOf(purchased_armor[x]), 1);
+		}
+	}
+	
+	for(x in purchased_bows){
+		if(purchased_bows[x] === selected_bow && selected_bow != 0){
+			purchased_bows.splice(purchased_bows.indexOf(purchased_bows[x]), 1);
+		}
+	}
+	
+	for(x in purchased_swords){
+		if(purchased_swords[x] === selected_sword && selected_sword != 0){
+			purchased_swords.splice(purchased_swords.indexOf(purchased_swords[x]), 1);
+		}
+	}
+	
+	
+	updateButtons();
+	updateBowButtons();
+	updateArmorButtons();
 	
 	
 });
@@ -956,7 +972,9 @@ for(let i = 0; i < armorButtons.length; i++){
       switchArmor(i);
     }
     }else{
+		  		armorButtons[i].value = "$" + armor[i].price;
       armorButtons[i].onclick = function(){
+
         socket.emit("request_buy_armor", i);
       }
     }
@@ -973,6 +991,7 @@ for(let i = 0; i < buttons.length; i++){
       switchSword(i);
     }
     }else{
+		buttons[i].value = "$" + swords[i].price;
       buttons[i].onclick = function(){
         socket.emit("request_buy", i);
       }
@@ -989,7 +1008,10 @@ for(let i = 0; i < bowButtons.length; i++){
       switchBow(i);
     }
     }else{
+		  bowButtons[i].value = "$" + bows[i].price;
+
       bowButtons[i].onclick = function(){
+
         socket.emit("request_buy_bow", i);
       }
     }

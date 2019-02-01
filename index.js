@@ -208,12 +208,12 @@ for(var i = 0; i < 6; i++){
 			wallCollisionAndResponse(players[p], game, {xIncrease: ar.vel.x * ar.knockback * 50, yIncrease: ar.vel.y * ar.knockback * 50});
 
                if(players[p].health <= 0){
-                respawnPlayer(players[p], game, serverVAR); 
                 
                 var p1ds = findPlayer(players, ar.from_player_id);
                 if(p1ds != undefined){
-                  p1ds.money += 100;
+                  p1ds.money += players[p].money / 2;
                   sendMessageToNamespace(serverVAR, "SERVER", players[p].playerName + " was annihilated by " + p1ds.playerName, "");
+				  respawnPlayer(players[p], game, serverVAR); 
                 }
                };
           }
@@ -221,7 +221,7 @@ for(var i = 0; i < 6; i++){
              toRemove.push(a);
              var armor = game.redStore.armor_upgrades[players[p]  .selected_armor];
              if(!playerInSafeZone(players[p], game)){
-               players[p].health -= 7.5 * (1 - armor.reduced_damage) * ar.attack_power;
+               players[p].health -= 12.5 * (1 - armor.reduced_damage) * ar.attack_power;
 			   players[p].x += ar.vel.x * ar.knockback * 50;
 			   players[p].y += ar.vel.y * ar.knockback * 50;
 			   players[p].targetX = players[p].x;
@@ -229,11 +229,11 @@ for(var i = 0; i < 6; i++){
 			wallCollisionAndResponse(players[p], game, {xIncrease: ar.vel.x * ar.knockback * 50, yIncrease: ar.vel.y * ar.knockback * 50});
 
               if(players[p].health <= 0){
-                respawnPlayer(players[p], game, serverVAR); 
                 var p1ds = findPlayer(players, ar.from_player_id);
                 if(p1ds != undefined){
-                  p1ds.money += 100;
+                  p1ds.money += players[p].money / 2;
                   sendMessageToNamespace(serverVAR, "SERVER", players[p].playerName + " was annihilated by " + p1ds.playerName, "");
+				  respawnPlayer(players[p], game, serverVAR); 
                 }
               }
              }
@@ -438,8 +438,10 @@ socket.on("hit", function(sword_id){
    doHit(players,p, player, game, sword_id, game.redStore.sword_upgrades);
     }
    if(players[p].health <= 0){
-     respawnPlayer(players[p], game, serverVAR);
-     player.money += 100;
+     player.money += players[p].money / 2;
+
+   respawnPlayer(players[p], game, serverVAR);
+	 
      sendMessageToNamespace(serverVAR, "SERVER", players[p].playerName + " couldn't handle " + player.playerName + "'s sword", "");
    
    }
@@ -613,7 +615,7 @@ function doHit(players,p, player, game, sword_id, swords){
       var d3 = Math.abs(rot2 - ((rot - 90) % 360));
 		var amt = 10;
 		if(game.mode === "ffa"){
-			amt = 5;
+			amt = 8;
 		}
       if(d5 < players[p].size * 1.5){
         var armor = game.redStore.armor_upgrades[players[p].selected_armor];
