@@ -225,17 +225,17 @@ socket.on("respawn_ffa", function(ar){
 	var toRemoveBow = undefined;
 	var toRemoveArmor = undefined;
 	for(x in purchased_swords){
-		if(purchased_swords[x] === selected_sword){
+		if(purchased_swords.indexOf(purchased_swords[x]) === selected_sword){
 			toRemoveSword = purchased_swords[x];
 		}
 	}
 	for(x in purchased_bows){
-		if(purchased_bows[x] === selected_bow){
+		if(purchased_swords.indexOf(purchased_bows[x]) === selected_bow){
 			toRemoveBow = purchased_bows[x];
 		}
 	}
 	for(x in purchased_armor){
-		if(purchased_armor[x] === ar){
+		if(purchased_swords.indexOf(purchased_armor[x]) === ar){
 			toRemoveArmor = purchased_armor[x];
 		}
 	}
