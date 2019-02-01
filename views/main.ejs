@@ -109,6 +109,7 @@ var textBox = document.getElementById("message");
 
 var inTypingMode = false;
 
+var overall_timer = 0;
 
 var GAME = undefined;
 
@@ -149,6 +150,17 @@ var arrow_img = [];
 arrow_img[0] = new Image();
 arrow_img[0].src = "/public/arrow.png";
 
+arrow_img[1] = new Image();
+arrow_img[1].src = "/public/dark_projectile.png";
+
+
+function getArrowFunctions(num){
+	if(num === 1){
+		return "spin, shrink";
+	}else{
+		return "";
+	}
+}
 
 for(var i = 0; i < 5; i++){
 messages[i] = {msg: "", id: ""};
@@ -377,6 +389,7 @@ socket.on('updateAllPositions', function(pl){
 function startDrawingLoop(){
 isLoopGoing = true;
 setInterval(function(){
+	overall_timer++;
   ctx.clearRect(0,0,canvas.width, canvas.height);
   var myPlayer = findPlayer(players, uniqueKey);
   
@@ -576,9 +589,17 @@ ctx.fillStyle = "black";
   for(a in arrows){
     ctx.save();
     var ar = arrows[a];
+	var fnctns = getArrowFunctions(ar.projectile_num);
     ctx.translate(ar.x- xOffset, ar.y - yOffset);
     ctx.rotate(degrees_to_radians(ar.rotation));
-     ctx.drawImage(arrow_img[0], -40, -40, 80, 80);
+	if(fnctns.includes("spin")){
+	ctx.rotate(degrees_to_radians((overall_timer % 360) * 30));
+	}
+	var size = 80;
+	if(fnctns.includes("shrink")){
+		size -= 25;
+	}
+     ctx.drawImage(arrow_img[ar.projectile_num], -size/2, -size/2, size, size);
      ctx.restore();
   }
 
@@ -816,7 +837,9 @@ function loadStoreStuff(){
     item_div.style.width = "600px";
 
     var img = document.createElement("img");
-  
+	img.style.width = "64px";
+	img.style.height = "64px";
+	
     img.src = swords[s].path;
 
 
@@ -851,7 +874,8 @@ function loadStoreStuff(){
     item_div.style.width = "600px";
 
     var img = document.createElement("img");
-  
+  img.style.width = "64px";
+	img.style.height = "64px";
     img.src = bows[s].path[0];
 
 
@@ -884,7 +908,8 @@ for(var s in armor){
     item_div.style.width = "600px";
 
     var img = document.createElement("img");
-  
+  img.style.width = "64px";
+	img.style.height = "64px";
     img.src = armor[s].path;
 
 

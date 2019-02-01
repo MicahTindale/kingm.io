@@ -186,15 +186,21 @@ for(var i = 0; i < 6; i++){
       var ray = getNormalizedRay(ar.rotation);
       var newX = ar.x + ray.x*30;
       var newY = ar.y + ray.y*30;
+	  var range = 1.1;
+	  if(arrows[a].projectile_num === 1){
+		newX = ar.x;
+		newY = ar.y;
+		range = 2;
+	  }
      if(checkIfIntersectionWithWalls(game, ar)){
         toRemove.push(a);
-     }else{
-      if(dist(newX, newY, players[p].x , players[p].y) < players[p].size * 1.1){
+     }else if(arrows[a].from_player_id != players[p].key){
+      if(dist(newX, newY, players[p].x , players[p].y) < players[p].size * range){
         if(gamemode === "teams"){
           if(ar.from_team != players[p].team){
              toRemove.push(a);
              var armor = game.redStore.armor_upgrades[players[p]  .selected_armor];
-               players[p].health -= 15 * (1 - armor.reduced_damage);
+               players[p].health -= 15 * (1 - armor.reduced_damage) * ar.attack_power;
 			   players[p].x += ar.vel.x * ar.knockback * 50;
 			   players[p].y += ar.vel.y * ar.knockback * 50;
 			   players[p].targetX = players[p].x;
@@ -215,7 +221,7 @@ for(var i = 0; i < 6; i++){
              toRemove.push(a);
              var armor = game.redStore.armor_upgrades[players[p]  .selected_armor];
              if(!playerInSafeZone(players[p], game)){
-               players[p].health -= 15 * (1 - armor.reduced_damage);
+               players[p].health -= 15 * (1 - armor.reduced_damage) * ar.attack_power;
 			   players[p].x += ar.vel.x * ar.knockback * 50;
 			   players[p].y += ar.vel.y * ar.knockback * 50;
 			   players[p].targetX = players[p].x;
@@ -416,7 +422,9 @@ socket.on("bow_end", function(num){
   var player = findPlayer(players, socket.id);
   if(player != undefined && num >= 20 * game.redStore.bow_upgrades[player.selected_bow].load_speed && !playerInSafeZone(player, game)){
     var ray = getNormalizedRay(player.rotation);
-    arrows.push(new Arrow(player.x - (ray.y * 42), player.y - (-ray.x * 42), {x: ray.x, y: ray.y}, player.rotation, player.team, player.key, game.redStore.bow_upgrades[player.selected_bow].knockback));
+	var a = new Arrow(player.x - (ray.y * 42), player.y - (-ray.x * 42), {x: ray.x, y: ray.y}, player.rotation, player.team, player.key, game.redStore.bow_upgrades[player.selected_bow].knockback, game.redStore.bow_upgrades[player.selected_bow].attack_power);
+    a.projectile_num = game.redStore.bow_upgrades[player.selected_bow].arrow_img_id; 
+	arrows.push(a);
     player.isBowTime = false;
   }
 });
@@ -637,7 +645,7 @@ function updateArrows(arrows){
   }
 }
 
-function Arrow(x, y, vel, rot, ft, f_p_id, kb){
+function Arrow(x, y, vel, rot, ft, f_p_id, kb, atk){
   this.x = x;
   this.y = y;
   this.vel = vel; 
@@ -646,6 +654,8 @@ function Arrow(x, y, vel, rot, ft, f_p_id, kb){
   this.from_team = ft;
   this.from_player_id = f_p_id;
   this.knockback = kb;
+  this.projectile_num = 0;
+  this.attack_power = atk;
 }
 
 function getNormalizedRay(rotation){
@@ -921,8 +931,15 @@ function Store(x, y, width, height){
     kb_bow[0] = "/public/kb_bow_1.png";
    kb_bow[1] = "/public/kb_bow_2.png";
    kb_bow[2] = "/public/kb_bow_3.png";
+      var dark_bow = [];
+    dark_bow[0] = "/public/dark_bow_1.png";
+   dark_bow[1] = "/public/dark_bow_2.png";
+   dark_bow[2] = "/public/dark_bow_3.png";
    this.bow_upgrades.push(new Bow(cross_bow, "Cross Bow", 1, 1, 500, 0, 1));
    this.bow_upgrades.push(new Bow(kb_bow, "Knockback Bow", 1, 2.5, 500,1000, 5));
+   this.bow_upgrades.push(new Bow(dark_bow, "Dark Bow", 2, 0.75, 500,2000, 3));
+   this.bow_upgrades[2].arrow_img_id = 1;
+   
    
     this.armor_upgrades = [];
     this.armor_upgrades.push(new Armor("/public/blank.png", "No Armor", 0, 0));
@@ -953,6 +970,7 @@ function Bow(img_path, name, attack_power, load_speed, attack_range, price, kb){
   this.price  = price;
   this.image = [];
   this.knockback = kb;
+  this.arrow_img_id = 0;
 
 }
 
