@@ -780,6 +780,9 @@ function respawnPlayer(player, game, serverVAR){
   player.health = player.maxHealth;
   if(game.mode === "ffa"){
 	serverVAR.to(player.key).emit("respawn_ffa", {});
+	player.selected_sword = 0;
+	player.selected_bow = 0;
+	player.selected_armor = 0;
   }
  
 }

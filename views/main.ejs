@@ -221,7 +221,34 @@ socket.on("hit_anim", function(info){
   }
 });
 socket.on("respawn_ffa", function(){
-console.log("RSPWN");
+	var toRemoveSword = undefined;
+	var toRemoveBow = undefined;
+	var toRemoveArmor = undefined;
+	for(x in purchased_swords){
+		if(purchased_swords[x] === selected_sword){
+			toRemoveSword = purchased_swords[x];
+		}
+	}
+	for(x in purchased_bows){
+		if(purchased_bows[x] === selected_bow){
+			toRemoveBow = purchased_bows[x];
+		}
+	}
+	for(x in purchased_armor){
+		if(purchased_armor[x] === selected_armor){
+			toRemoveArmor = purchased_armor[x];
+		}
+	}
+	if(toRemoveSword != undefined){
+		purchased_swords.splice(purchased_swords.indexOf(toRemoveSword), 1);
+	}
+	if(toRemoveBow != undefined){
+		purchased_bows.splice(purchased_bows.indexOf(toRemoveBow), 1);
+	}
+	if(toRemoveArmor != undefined){
+		purchased_armor.splice(purchased_armor.indexOf(toRemoveArmor), 1);
+	}
+	
 });
 
 socket.on("scores", function(s){
