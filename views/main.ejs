@@ -220,7 +220,7 @@ socket.on("hit_anim", function(info){
   player.sword_animation_timer = 0;
   }
 });
-socket.on("respawn_ffa", function(){
+socket.on("respawn_ffa", function(ar){
 	var toRemoveSword = undefined;
 	var toRemoveBow = undefined;
 	var toRemoveArmor = undefined;
@@ -235,7 +235,7 @@ socket.on("respawn_ffa", function(){
 		}
 	}
 	for(x in purchased_armor){
-		if(purchased_armor[x] === selected_armor){
+		if(purchased_armor[x] === ar){
 			toRemoveArmor = purchased_armor[x];
 		}
 	}
