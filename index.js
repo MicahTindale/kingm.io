@@ -784,6 +784,7 @@ function respawnPlayer(player, game, serverVAR){
 	player.selected_bow = 0;
 	player.selected_armor = 0;
   }
+  console.log(player);
  
 }
 

@@ -221,35 +221,7 @@ socket.on("hit_anim", function(info){
   }
 });
 socket.on("respawn_ffa", function(ar){
-	var toRemoveSword = undefined;
-	var toRemoveBow = undefined;
-	var toRemoveArmor = undefined;
-	for(x in purchased_swords){
-		console.log(selected_sword);
-		console.log(purchased_swords[x]);
-		if(purchased_swords[x] == selected_sword){
-			toRemoveSword = x;
-		}
-	}
-	for(x in purchased_bows){
-		if(purchased_bows[x] == selected_bow){
-			toRemoveBow = x;
-		}
-	}
-	for(x in purchased_armor){
-		if(purchased_armor[x] == ar){
-			toRemoveArmor = x;
-		}
-	}
-	if(toRemoveSword != undefined){
-		purchased_swords.splice(purchased_swords.indexOf(purchased_swords[toRemoveSword]), 1);
-	}
-	if(toRemoveBow != undefined){
-		purchased_bows.splice(purchased_bows.indexOf(purchased_bows[toRemoveBow]), 1);
-	}
-	if(toRemoveArmor != undefined){
-		purchased_armor.splice(purchased_armor.indexOf(purchased_armor[toRemoveArmor]), 1);
-	}
+	
 	
 });
 
