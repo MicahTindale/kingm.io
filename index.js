@@ -9,28 +9,11 @@ const FFA_LIMIT = 10;
 const PUBLIC_TEAMS_LIMIT = 16;
 const GAME_END_SCORE = 5000;
 const session = require("client-sessions");
-const crypto = require("crypto");
-const algorithm = 'aes-256-cbc';
-const key = crypto.randomBytes(32);
-const iv = crypto.randomBytes(16);
+const bcrypt = require("bcryptjs");
+
 const validator = require("email-validator");
 var current_ffa_server = "";
 
-function encrypt(text) {
- let cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(key), iv);
- let encrypted = cipher.update(text);
- encrypted = Buffer.concat([encrypted, cipher.final()]);
- return { iv: iv.toString('hex'), encryptedData: encrypted.toString('hex') };
-}
-
-function decrypt(text) {
- let iv = Buffer.from(text.iv, 'hex');
- let encryptedText = Buffer.from(text.encryptedData, 'hex');
- let decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(key), iv);
- let decrypted = decipher.update(encryptedText);
- decrypted = Buffer.concat([decrypted, decipher.final()]);
- return decrypted.toString();
-}
 
 const client = new pg.Client({
   connectionString: process.env.DATABASE_URL || "postgres://olyoefoguupgxu:5c65605121f80ede5cb4e49203cbb773819aa512920c3be1461430398fb45155@ec2-54-235-68-3.compute-1.amazonaws.com:5432/d7sucnsptqtfjd",
@@ -39,9 +22,11 @@ const client = new pg.Client({
 client.connect();
 
 
+
+
 function findUser(name, pw){
 	var toReturn = undefined;
-	client.query("SELECT * FROM users WHERE name='" + name.toString() + "' AND password = '" + pw.toString() + "';", (err, res) => {
+	client.query("SELECT * FROM users WHERE name='" + name.toString() + "' AND password = MD5('" + pw.toString() + "');", (err, res) => {
   if (err) throw err;
   for (let row of res.rows) {
 	toReturn = {id: row.id, name: row.name, skins: row.skins};
@@ -100,13 +85,18 @@ app.get('/', (req, res) => {
 app.post('/', (req, res) => {
 	var name = req.body.name;
 	var pass = req.body.password;
+	
 	var params = undefined;
-	client.query("SELECT * FROM users WHERE name='" + name + "' AND password = '" + pass + "';", (err, r) => {
+	
+	
+	client.query("SELECT * FROM users WHERE name='" + name + "';", (err, r) => {
 		if (err) throw err;
 			for (let row of r.rows) {
-				req.session.id = row.id;
-				var obj = {id: row.id, name: row.name, skins: row.skins};
-				params = obj;
+				if(bcrypt.compareSync(pass, row.password)){
+						req.session.id = row.id;
+						var obj = {id: row.id, name: row.name, skins: row.skins};
+						params = obj;
+				}
 			}
 		if(params != undefined){
 			res.render('join.ejs', params)
@@ -136,7 +126,7 @@ app.post('/register', (req, res) => {
 		if(r.rows.length > 0){
 			res.render("register.ejs", {message: "Email or username already taken"});
 		}else if(validator.validate(req.body.email)){
-			client.query("INSERT INTO users (password, skins, name, email) VALUES ('" + req.body.password + "', '', '" + req.body.name + "', '" + req.body.email + "');", (e, r2) => {
+			client.query("INSERT INTO users (password, skins, name, email) VALUES ('" + bcrypt.hashSync(req.body.password, 10) + "', '', '" + req.body.name + "', '" + req.body.email + "');", (e, r2) => {
 					if(e) throw e;
 				res.render("login.ejs", {message: "Registered Successfully"});
 				
