@@ -14,11 +14,11 @@ skins[5].src = "/public/skins/skin_5.png"; // INDIAN FLAG
 skins[6] = new Image();
 skins[6].src = "/public/skins/skin_6.png"; // JOYAL FLAG
 skins[7] = new Image();
-skins[7].src = "/public/skins/skin_7.png"; // JOYAL FLAG
+skins[7].src = "/public/skins/skin_7.png"; // ABHI FLAG
 
 
 
-var order = [0,1,3,5,2,4,6, 7];
+var order = [0,1,3,5,2,4,6,7];
 
 var skin_perms = [];
 skin_perms.push(0);
