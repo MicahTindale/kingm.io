@@ -5,7 +5,7 @@ skins[1] = new Image();
 skins[1].src = "/public/skins/skin_1.png";
 skins[2] = new Image();
 skins[2].src = "/public/skins/skin_2.png";
-
+var kSAJDKASD = 0;
 var order = [0,1,2];
 
 var skin_perms = [];
