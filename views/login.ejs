@@ -1,0 +1,26 @@
+<html>
+<body style="background: black"> 
+
+<style> input {width: 300px; height: 40px; margin: 10px; font-family: Trebuchet MS; font-size: 20px;} select {width: 300px; height: 40px; margin: 10px; font-family: Trebuchet MS; font-size: 20px;}</style>
+
+<div style="text-align: center"> 
+<p1 style='color: white; font-size: 40px; font-family: Trebuchet MS'> LOGIN </p1>
+<br>
+<form method="POST" action = "/">
+<input placeholder= "Username" id="name" name="name" required> </input> <br>
+<input type="password"placeholder= "Password" id="password" name="password" required> </input> <br>
+<input type="submit" value="Login">  </input>
+</form> 
+<a href="/register" style="color: white;"> Don't have an account? Register Here!</a>
+</div>
+
+</body>
+
+<script>
+var msg = "<%= message %>";
+if(msg != "" && msg != undefined){
+	alert(msg);
+}
+</script>
+
+<html>

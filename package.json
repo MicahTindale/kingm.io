@@ -5,6 +5,8 @@
   "main": "index.js",
   "dependencies": {
     "body-parser": "^1.18.3",
+    "crypt": "0.0.2",
+    "crypto": "^1.0.1",
     "ejs": "^2.6.1",
     "express": "^4.16.4",
     "path": "^0.12.7",

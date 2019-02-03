@@ -1,5 +1,5 @@
 <html>
-<body style="background: black;">
+<body style="background: black; text-align: center;">
 <title> KingM.IO </title>
 
 <style> input {width: 300px; height: 40px; margin: 10px; font-family: Trebuchet MS; font-size: 20px;} select {width: 300px; height: 40px; margin: 10px; font-family: Trebuchet MS; font-size: 20px;}</style>
@@ -22,7 +22,13 @@
    
   </select> <br>
 <input type = 'submit' value= 'Join Game'> 
+<input type="hidden" name="skin" value="-1" id="skin"> </input>
 </form>
+<a id ="linlout" style="color: white; font-size: 23px; font-family: Trebuchet MS; "href="/login">Log In</a>
+<div id="skins_div">
+<div style="text-align: center; margin-bottom: 2px;"id="div_skins_title"> </div>
+</div>
+
 <div style="font-family: Trebuchet MS; font-size: 20px; color: white;">
 ~Earn money by killing other players <br>
 ~Earn money by staying alive <br>
@@ -48,7 +54,67 @@ Contact officialtingames@gmail.com with any suggestions
 </div>
 
 <a style="color: white;" href="/updates">View Updates</a>
+<script src="/public/load_skins.js"> </script>
 
+<script>
+
+var selected_skin = 0;
+var ski = [];
+
+var name = "<%= name %>";
+var id = "<%= id %>";
+var sk = "<%= skins %>";
+if(name != undefined && name != ""){
+document.getElementById("name").value = name;
+document.getElementById("name").readOnly = true;
+document.getElementById("linlout").href = "/logout";
+document.getElementById("linlout").innerHTML = "Log Out";
+if(sk != ""){
+	ski = JSON.parse(sk);
+}
+populateSkinBox();
+}
+
+
+function populateSkinBox(){
+	var sk_div = document.getElementById("skins_div");
+	sk_div.style = "text-align: left;background: white;font-size: 35px;  font-family: Trebuchet MS; margin: 30px; padding: 10px;"
+	var skins_title = document.createElement("p1");
+	skins_title.innerHTML = "SKINS";
+	document.getElementById("div_skins_title").appendChild(skins_title);
+	sk_div.appendChild(document.createElement("br"));
+	for(let x in order){
+		if(arrayIncludes(x, skin_perms) || arrayIncludes(x, ski)){
+		skins[order[x]].style.padding = "10px";
+		sk_div.appendChild(skins[order[x]]);
+		skins[order[x]].onclick = function(){
+			document.getElementById("skin").value = order[x];
+			for(let i in skins){
+				if(skins[i] != skins[order[x]]){
+					skins[i].style.background = "white";
+				}else{
+					skins[i].style.background = "blue";
+				}
+			}
+		};
+		}
+	}
+
+	
+}
+function arrayIncludes(x, arr){
+	var toReturn = false;
+	for(let a in arr){
+
+		if(arr[a] == x){
+		toReturn = true;
+		}
+	}
+	return toReturn;
+}
+
+
+</script>
 
 </div>
 </body>

@@ -65,7 +65,7 @@ margin: 0px; padding: 0px;">
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>
-
+<script src="/public/load_skins.js"> </script>
 
 <script>
 
@@ -114,6 +114,7 @@ var overall_timer = 0;
 var GAME = undefined;
 
 var serverName = "<%= server %>";
+var skin = <%= skin %>;
 var buttons = [];
 var bowButtons = [];
 var armorButtons = [];
@@ -187,7 +188,11 @@ function closeStore(){
 closeStore();
 
 var name = "<%= name %>";
-socket.emit("info", {name: name});
+var skin = "<%= skin %>";
+if(skin === ""){
+	skin = -1;
+}
+socket.emit("info", {name: name, skin: skin});
 socket.on('disconnect', function(){
   console.log("disconnecting");
 });
@@ -553,13 +558,17 @@ ctx.fillStyle = "black";
 	ctx.fill();
 	ctx.globalAlpha = 1;
 	}
+	
 	ctx.fillStyle = players[p].team;
+	if(players[p].skin > -1){
+	ctx.drawImage(skins[players[p].skin], players[p].x - players[p].size - xOffset, players[p].y - players[p].size - yOffset, players[p].size * 2, players[p].size * 2);
+	}else{
   ctx.beginPath();
   ctx.shadowColor = "black";
   ctx.shadowBlur = 20;
    ctx.arc(players[p].x - xOffset, players[p].y - yOffset, size, 0, 2 * Math.PI);
     ctx.fill();
-	
+	}
     ctx.drawImage(armor[players[p].selected_armor].image, players[p].x - xOffset - players[p].size - 2, players[p].y - yOffset - players[p].size - 2, players[p].size*2 + 4, players[p].size*2 + 4);
     ctx.save();
     ctx.translate(players[p].x - xOffset, players[p].y - yOffset);
