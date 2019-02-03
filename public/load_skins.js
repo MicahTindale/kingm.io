@@ -12,7 +12,7 @@ skins[4].src = "/public/skins/skin_4.png"; // NINJA
 skins[5] = new Image();
 skins[5].src = "/public/skins/skin_5.png"; // INDIAN FLAG
 skins[6] = new Image();
-skins[6].src = "/public/skins/skin_5.png"; // INDIAN FLAG
+skins[6].src = "/public/skins/skin_6.png"; // INDIAN FLAG
 
 
 var order = [0,1,3,5,2,4,6];
