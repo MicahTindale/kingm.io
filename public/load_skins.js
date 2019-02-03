@@ -1,14 +1,21 @@
 var skins = [];
 skins[0] = new Image();
-skins[0].src = "/public/skins/skin_0.png";
+skins[0].src = "/public/skins/skin_0.png"; // AMERICAN FLAG
 skins[1] = new Image();
-skins[1].src = "/public/skins/skin_1.png";
+skins[1].src = "/public/skins/skin_1.png"; // CHINESE FLAG
 skins[2] = new Image();
-skins[2].src = "/public/skins/skin_2.png";
-var kSAJDKASD = 0;
-var order = [0,1,2];
+skins[2].src = "/public/skins/skin_2.png"; // KINGM SKIN 
+skins[3] = new Image();
+skins[3].src = "/public/skins/skin_3.png"; // SWEDISH FLAG
+skins[4] = new Image();
+skins[4].src = "/public/skins/skin_4.png"; // NINJA
+
+
+var order = [0,1,3,2,4];
 
 var skin_perms = [];
 skin_perms.push(0);
 skin_perms.push(1);
+skin_perms.push(3);
+
 
