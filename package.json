@@ -5,9 +5,10 @@
   "main": "index.js",
   "dependencies": {
     "body-parser": "^1.18.3",
+    "bcryptjs": "^2.4.3",
     "client-sessions": "^0.8.0",
-    "crypto": "^1.0.1",
     "crypt": "^0.0.2",
+    "crypto": "^1.0.1",
     "ejs": "^2.6.1",
     "email-validator": "^2.0.4",
     "express": "^4.16.4",
