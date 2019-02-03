@@ -21,6 +21,8 @@
   </select> <br>
 <input type = 'submit' value= 'Join Game'> 
 <input type="hidden" name="skin" value="-1" id="skin"> </input>
+<input type="hidden" name="l" value="" id="l"> </input>
+
 </form>
 <a id ="linlout" style="color: white; font-size: 23px; font-family: Trebuchet MS; "href="/login">Log In</a>
 <div id="skins_div">
@@ -66,11 +68,14 @@ if(name != undefined && name != ""){
 document.getElementById("name").value = name;
 document.getElementById("name").readOnly = true;
 document.getElementById("linlout").href = "/logout";
-document.getElementById("linlout").innerHTML = "Log Out";
+document.getElementById("l").value = "true";
 if(sk != ""){
 	ski = JSON.parse(sk);
 }
 populateSkinBox();
+}else{
+document.getElementById("l").value = "false";
+
 }
 
 

@@ -152,6 +152,8 @@ app.post('/join_game', (req, res) => {
   var name = req.body.name;
   var mode = req.body.mode;
   var skin = req.body.skin;
+  var loggedIn = req.body.l;
+  console.log(loggedIn);
   var s = undefined; 
   if(mode === "/ffa"){
  s = findFreeFFA().nsps.name;
@@ -160,7 +162,7 @@ app.post('/join_game', (req, res) => {
 }else if (mode === "teams_pr"){
  
 }
-  res.render('main.ejs', {name: name, server: s, skin: skin});
+  res.render('main.ejs', {name: name, server: s, skin: skin, loggedIn: loggedIn});
 });
 
 var port = process.env.PORT || 4000;
@@ -335,6 +337,7 @@ for(var i = 0; i < 6; i++){
                 var p1ds = findPlayer(players, ar.from_player_id);
                 if(p1ds != undefined){
                   p1ds.money += players[p].money / 2;
+				  p1ds.kills += 1;
                   sendMessageToNamespace(serverVAR, "SERVER", players[p].playerName + " was annihilated by " + p1ds.playerName, "");
 				  respawnPlayer(players[p], game, serverVAR); 
                 }
@@ -355,6 +358,7 @@ for(var i = 0; i < 6; i++){
                 var p1ds = findPlayer(players, ar.from_player_id);
                 if(p1ds != undefined){
                   p1ds.money += players[p].money / 2;
+				  p1ds.kills += 1;
                   sendMessageToNamespace(serverVAR, "SERVER", players[p].playerName + " was annihilated by " + p1ds.playerName, "");
 				  respawnPlayer(players[p], game, serverVAR); 
                 }
@@ -484,6 +488,21 @@ serverVAR.on('connection', function(socket){
 	}
   }
   socket.on("disconnect", function(){
+	  var player = findPlayer(players, socket.id);
+	  if(player != undefined && player.loggedIn){
+	client.query("SELECT * FROM users WHERE name='" + player.playerName + "';", (err, r) => {
+		if (err) throw err;
+			for (let row of r.rows) {
+				var overallKills = row.kills;
+				overallKills += player.kills;
+					client.query("UPDATE Users SET kills = '" + overallKills + "' WHERE name='" + player.playerName + "';", (e, r2) => {
+						if(e) throw e;
+						
+					});	
+			}
+		
+	});
+	  }
     playerLeaving(socket.id, players, serverVAR);
   });
   socket.on('leaving', function(key){
@@ -505,6 +524,7 @@ name = name.slice(0, 20);
   }
   var newPlayer = new player(name, game, t);
   newPlayer.skin = info.skin;
+  newPlayer.loggedIn = info.loggedIn;
   if(teamToReturn === "red"){
     teamToReturn = "blue";
   }else{
@@ -564,7 +584,7 @@ socket.on("hit", function(sword_id){
     }
    if(players[p].health <= 0){
      player.money += players[p].money / 2;
-
+	player.kills += 1;
    respawnPlayer(players[p], game, serverVAR);
 	 
      sendMessageToNamespace(serverVAR, "SERVER", players[p].playerName + " couldn't handle " + player.playerName + "'s sword", "");
@@ -850,6 +870,7 @@ function generateRandomTeam(teamToReturn){
 
 function player(name, g, team){
 this.key = "";
+this.loggedIn = false;
 this.x = 0;
 this.y = 0;
 this.playerName = name;
@@ -877,6 +898,7 @@ this.storeTime = 0;
 this.timeSinceLast = 30 * 10;
 this.hasShield = false;
 this.skin = -1;
+this.kills = 0;
 }
 function getPosition(team, game){
   var rand = Math.random();

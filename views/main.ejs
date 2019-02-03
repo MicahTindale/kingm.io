@@ -189,10 +189,11 @@ closeStore();
 
 var name = "<%= name %>";
 var skin = "<%= skin %>";
+var loggedIn = <%= loggedIn %>;
 if(skin === ""){
 	skin = -1;
 }
-socket.emit("info", {name: name, skin: skin});
+socket.emit("info", {name: name, skin: skin, loggedIn: loggedIn});
 socket.on('disconnect', function(){
   console.log("disconnecting");
 });
