@@ -82,7 +82,7 @@ function populateSkinBox(){
 	document.getElementById("div_skins_title").appendChild(skins_title);
 	sk_div.appendChild(document.createElement("br"));
 	for(let x in order){
-		if(arrayIncludes(x, skin_perms) || arrayIncludes(x, ski)){
+		if(arrayIncludes(order[x], skin_perms) || arrayIncludes(order[x], ski)){
 		skins[order[x]].style.padding = "10px";
 		sk_div.appendChild(skins[order[x]]);
 		skins[order[x]].onclick = function(){
