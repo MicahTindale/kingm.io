@@ -1086,7 +1086,7 @@ function Store(x, y, width, height){
    dark_bow[2] = "/public/dark_bow_3.png";
    this.bow_upgrades.push(new Bow(cross_bow, "Cross Bow", 1, 1, 500, 0, 1));
    this.bow_upgrades.push(new Bow(kb_bow, "Knockback Bow", 1, 2.5, 500,1000, 5));
-   this.bow_upgrades.push(new Bow(dark_bow, "Dark Bow", 2, 0.75, 500,2000, 3));
+   this.bow_upgrades.push(new Bow(dark_bow, "Dark Bow", 1.3, 0.75, 500,2500, 3));
    this.bow_upgrades[2].arrow_img_id = 1;
    
    
