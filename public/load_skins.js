@@ -18,7 +18,7 @@ skins[7].src = "/public/skins/skin_7.png"; // ABHI FLAG
 skins[8] = new Image();
 skins[8].src = "/public/skins/skin_8.png"; // SEANYO
 skins[9] = new Image();
-skins[9].src = "/public/skins/skin_8.png"; // SEANYO
+skins[9].src = "/public/skins/skin_9.png"; // SEANYO
 
 
 
