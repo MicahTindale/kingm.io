@@ -1,0 +1,5 @@
+To run this locally:
+
+-- Use Node.js
+-- Change it to run on local port
+-- Change it to run on local database
